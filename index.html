@@ -107,6 +107,17 @@
   }
   nav button i{display:block;font-size:21px;font-style:normal;margin-bottom:2px}
   nav button.on{color:var(--acc)}
+  .langbtn{width:auto;padding:0 12px;font-size:13px;font-weight:700;color:var(--txt);letter-spacing:.5px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .grid .ph{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel2)}
+  .grid .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .grid .ph .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.65);color:#fff;font-size:16px;cursor:pointer}
+  .grid .ph .n{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:2px 8px;border-radius:999px}
+  .grid .add{aspect-ratio:1;border:2px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:var(--dim);font-size:13px;background:var(--panel)}
+  .grid .add button{width:80%;padding:9px;font-size:14px}
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:3px}
+  .seg button{flex:1;border:none;background:none;color:var(--dim);padding:10px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer}
+  .seg button.on{background:var(--acc);color:#1a1205}
 </style>
 </head>
 <body>
@@ -114,7 +125,8 @@
 <header>
   <span class="em">🔩</span>
   <h1>Identify-AI</h1>
-  <button class="iconbtn" onclick="go('set')" title="Ρυθμίσεις">⚙</button>
+  <button class="iconbtn langbtn" id="langBtn" onclick="setLang(LANG==='el'?'en':'el')">EN</button>
+  <button class="iconbtn" onclick="go('set')" data-it="nav_set">⚙</button>
 </header>
 
 <main>
@@ -123,49 +135,48 @@
 <section id="v-scan">
   <div id="shotBox" class="shot">
     <span class="big">📷</span>
-    <strong>Φωτογράφισε το εξάρτημα</strong>
-    <small style="display:block;margin-bottom:14px">Διάλεξε τρόπο</small>
+    <strong data-i="shot_title"></strong>
+    <small style="display:block;margin-bottom:14px" data-i="shot_sub"></small>
     <div class="row">
-      <button class="btn sec" onclick="camIn.click()">📷 Κάμερα</button>
-      <button class="btn sec" onclick="galIn.click()">🖼 Συλλογή</button>
+      <button class="btn sec" onclick="camIn.click()" data-i="btn_cam"></button>
+      <button class="btn sec" onclick="galIn.click()" data-i="btn_gal"></button>
     </div>
-    <button class="btn sec" id="liveBtn" style="margin-top:9px" onclick="liveCam()">🎥 Ζωντανή κάμερα στη σελίδα</button>
-    <div class="hint" id="camHint" style="text-align:left"></div>
+    <button class="btn sec liveOnly" style="margin-top:9px" onclick="liveCam()" data-i="btn_live"></button>
+    <div class="hint camHint" style="text-align:left"></div>
   </div>
 
   <div id="liveBox" class="hidden">
     <video id="vid" playsinline autoplay muted style="width:100%;border-radius:var(--r);border:1px solid var(--line);display:block;background:#000"></video>
     <div class="row" style="margin-top:10px">
-      <button class="btn" onclick="snap()">Λήψη</button>
-      <button class="btn sec" onclick="stopCam()">Άκυρο</button>
+      <button class="btn" onclick="snap()" data-i="btn_snap"></button>
+      <button class="btn sec" onclick="stopCam()" data-i="btn_cancel"></button>
     </div>
   </div>
 
   <div id="prevBox" class="hidden">
-    <img id="preview" alt="">
-    <div class="row" style="margin-top:10px">
-      <button class="btn sec" onclick="clearShot()">Άλλη φωτογραφία</button>
-    </div>
+    <div class="grid" id="grid"></div>
+    <div class="hint" id="multiHint"></div>
+    <button class="btn sec" style="margin-top:10px" onclick="clearShot()" data-i="btn_clear"></button>
   </div>
   <input type="file" id="camIn" accept="image/*" capture="environment" class="hidden" onchange="loadShot(event)">
-  <input type="file" id="galIn" accept="image/*" class="hidden" onchange="loadShot(event)">
+  <input type="file" id="galIn" accept="image/*" multiple class="hidden" onchange="loadShot(event)">
 
   <div class="card" style="margin-top:14px">
-    <h2>Πλαίσιο</h2>
-    <label>Από πού προέρχεται;</label>
+    <h2 data-i="ctx_title"></h2>
+    <label data-i="ctx_q"></label>
     <div class="chips" id="chips"></div>
     <div style="margin-top:14px">
-      <label>Σημείωση (προαιρετικά)</label>
-      <textarea id="note" placeholder="π.χ. έσπασε σε αντλία νερού, ή: το βρήκα σε κουτί με ανταλλακτικά"></textarea>
+      <label data-i="note_l"></label>
+      <textarea id="note" data-ip="note_ph"></textarea>
     </div>
     <div class="sw" onclick="event.target.tagName!=='INPUT'&&(refChk.checked=!refChk.checked)">
       <input type="checkbox" id="refChk">
-      <span>Υπάρχει αντικείμενο αναφοράς στη φωτογραφία (κέρμα, χάρακας, κάρτα)</span>
+      <span data-i="ref_l"></span>
     </div>
-    <div class="hint">Χωρίς αντικείμενο αναφοράς οι διαστάσεις είναι απλή εκτίμηση. Βάλε ένα κέρμα των 2 ευρώ δίπλα και η ακρίβεια ανεβαίνει κατακόρυφα.</div>
+    <div class="hint" data-i="ref_hint"></div>
   </div>
 
-  <button class="btn" id="goBtn" onclick="analyze()" disabled>Ανάλυση</button>
+  <button class="btn" id="goBtn" onclick="analyze()" disabled data-i="btn_go"></button>
 
   <div id="out" style="margin-top:14px"></div>
 </section>
@@ -178,156 +189,299 @@
 <!-- ══ ΡΥΘΜΙΣΕΙΣ ══ -->
 <section id="v-set" class="hidden">
   <div class="card">
-    <h2>Κλειδί πρόσβασης</h2>
-    <label>Δωρεάν κλειδί (χωρίς κάρτα)</label>
-    <input type="password" id="key" placeholder="sk-or-..." autocomplete="off">
-    <div class="hint"><b>Πώς το παίρνεις, σε δύο λεπτά:</b><br>
-    1) Άνοιξε <b>openrouter.ai</b> και πάτα σύνδεση με τον λογαριασμό σου στο Google.<br>
-    2) Άνοιξε <b>openrouter.ai/keys</b> → δημιουργία κλειδιού → δώσε όποιο όνομα θες.<br>
-    3) Αντίγραψε το κλειδί (ξεκινά με <b>sk-or-</b>) και επικόλλησέ το εδώ.<br><br>
-    Δεν χρειάζεται κάρτα και δεν υπάρχει τρόπος να χρεωθείς: χωρίς υπόλοιπο, η υπηρεσία δίνει μόνο τα δωρεάν μοντέλα. Όριο περίπου 50 φωτογραφίες την ημέρα.<br>
-    Αποθηκεύεται μόνο σε αυτή τη συσκευή.</div>
-    <button class="btn" style="margin-top:12px" onclick="saveKey()">Αποθήκευση</button>
+    <h2 data-i="lang_title"></h2>
+    <div class="seg">
+      <button id="seg-el" onclick="setLang('el')">Ελληνικά</button>
+      <button id="seg-en" onclick="setLang('en')">English</button>
+    </div>
+    <div class="hint" data-i="lang_hint"></div>
   </div>
   <div class="card">
-    <h2>Δεδομένα</h2>
-    <div class="hint" style="margin:0 0 12px">Αποθηκευμένα εξαρτήματα: <b id="cnt">0</b></div>
-    <button class="btn sec" onclick="exportLib()">Εξαγωγή αρχείου</button>
-    <button class="btn danger" style="margin-top:9px" onclick="wipe()">Διαγραφή όλων</button>
+    <h2 data-i="key_title"></h2>
+    <label data-i="key_l"></label>
+    <input type="password" id="key" placeholder="sk-or-..." autocomplete="off">
+    <div class="hint" data-ih="key_help"></div>
+    <button class="btn" style="margin-top:12px" onclick="saveKey()" data-i="btn_save"></button>
+  </div>
+  <div class="card">
+    <h2 data-i="data_title"></h2>
+    <div class="hint" style="margin:0 0 12px"><span data-i="saved_n"></span> <b id="cnt">0</b></div>
+    <button class="btn sec" onclick="exportLib()" data-i="btn_export"></button>
+    <button class="btn danger" style="margin-top:9px" onclick="wipe()" data-i="btn_wipe"></button>
   </div>
 </section>
 
 </main>
 
 <nav>
-  <button id="n-scan" class="on" onclick="go('scan')"><i>📷</i>Αναγνώριση</button>
-  <button id="n-lib" onclick="go('lib')"><i>📚</i>Βιβλιοθήκη</button>
-  <button id="n-set" onclick="go('set')"><i>⚙</i>Ρυθμίσεις</button>
+  <button id="n-scan" class="on" onclick="go('scan')"><i>📷</i><span data-i="nav_scan"></span></button>
+  <button id="n-lib" onclick="go('lib')"><i>📚</i><span data-i="nav_lib"></span></button>
+  <button id="n-set" onclick="go('set')"><i>⚙</i><span data-i="nav_set"></span></button>
 </nav>
 
 <script>
-/* ─────────── κατάσταση ─────────── */
-const CTX = ['Αυτοκίνητο','Μηχανή','Φορτηγό','Υδραυλικά','Ηλεκτρολογικά','Ψύξη / κλιματισμός',
-             'Οικιακή συσκευή','Επαγγελματικός εξοπλισμός','Έπιπλο / ξυλουργική','Σκάφος','Δεν ξέρω'];
-let ctx = '', img = null, view = 'scan';
-const LS_KEY = 'exartima_key', LS_LIB = 'exartima_lib';
+/* ═══════════ ΜΕΤΑΦΡΑΣΕΙΣ ═══════════ */
+const MAXPH = 4;
+const T = {
+el:{
+  shot_title:'Φωτογράφισε το εξάρτημα', shot_sub:`Έως ${MAXPH} φωτογραφίες από διαφορετικές γωνίες`,
+  btn_cam:'📷 Κάμερα', btn_gal:'🖼 Συλλογή', btn_live:'🎥 Ζωντανή κάμερα στη σελίδα',
+  btn_snap:'Λήψη', btn_cancel:'Άκυρο', btn_clear:'Καθαρισμός φωτογραφιών', add_more:'Πρόσθεσε κι άλλη',
+  multi_hint:n=>`${n} από ${MAXPH} φωτογραφίες. Βγάλε μία κοντινή στον χαραγμένο κωδικό, αν υπάρχει — βοηθά πολύ. Όλες μαζί μετράνε ως μία ανάλυση.`,
+  ctx_title:'Πλαίσιο', ctx_q:'Από πού προέρχεται;',
+  ctx:['Αυτοκίνητο','Μηχανή','Φορτηγό','Υδραυλικά','Ηλεκτρολογικά','Ψύξη / κλιματισμός','Οικιακή συσκευή','Επαγγελματικός εξοπλισμός','Έπιπλο / ξυλουργική','Σκάφος','Δεν ξέρω'],
+  note_l:'Σημείωση (προαιρετικά)', note_ph:'π.χ. έσπασε σε αντλία νερού, ή: το βρήκα σε κουτί με ανταλλακτικά',
+  ref_l:'Υπάρχει αντικείμενο αναφοράς στη φωτογραφία (κέρμα, χάρακας, κάρτα)',
+  ref_hint:'Χωρίς αντικείμενο αναφοράς οι διαστάσεις είναι απλή εκτίμηση. Βάλε ένα κέρμα των 2 ευρώ δίπλα και η ακρίβεια ανεβαίνει κατακόρυφα.',
+  btn_go:'Ανάλυση',
+  lang_title:'Γλώσσα', lang_hint:'Αλλάζει όλη την εφαρμογή και τη γλώσσα των απαντήσεων. Όσα έχεις ήδη αποθηκεύσει μένουν στη γλώσσα που γράφτηκαν.',
+  key_title:'Κλειδί πρόσβασης', key_l:'Δωρεάν κλειδί (χωρίς κάρτα)',
+  key_help:`<b>Πώς το παίρνεις, σε δύο λεπτά:</b><br>
+    1) Άνοιξε <b>openrouter.ai</b> και πάτα σύνδεση με τον λογαριασμό σου στο Google.<br>
+    2) Άνοιξε <b>openrouter.ai/keys</b> → δημιουργία κλειδιού → δώσε όποιο όνομα θες.<br>
+    3) Αντίγραψε το κλειδί (ξεκινά με <b>sk-or-</b>) και επικόλλησέ το εδώ.<br><br>
+    Δεν χρειάζεται κάρτα και δεν υπάρχει τρόπος να χρεωθείς: χωρίς υπόλοιπο, η υπηρεσία δίνει μόνο τα δωρεάν μοντέλα. Όριο περίπου 50 αναλύσεις την ημέρα.<br>
+    Αποθηκεύεται μόνο σε αυτή τη συσκευή.`,
+  btn_save:'Αποθήκευση', key_saved:'Το κλειδί αποθηκεύτηκε.', key_deleted:'Το κλειδί διαγράφηκε.',
+  data_title:'Δεδομένα', saved_n:'Αποθηκευμένα εξαρτήματα:', btn_export:'Εξαγωγή αρχείου', btn_wipe:'Διαγραφή όλων',
+  nav_scan:'Αναγνώριση', nav_lib:'Βιβλιοθήκη', nav_set:'Ρυθμίσεις',
+  cam_file:'⚠ Η σελίδα άνοιξε ως τοπικό αρχείο, γι\' αυτό η ζωντανή κάμερα είναι κλειδωμένη. Χρησιμοποίησε Κάμερα ή Συλλογή.',
+  cam_insecure:'⚠ Η ζωντανή κάμερα απαιτεί ασφαλή σύνδεση. Χρησιμοποίησε Κάμερα ή Συλλογή.',
+  cam_denied:e=>`⚠ Δεν δόθηκε πρόσβαση στην κάμερα (${e}). Έλεγξε τα δικαιώματα του περιηγητή ή χρησιμοποίησε τη Συλλογή.`,
+  no_key:'Δεν έχεις καταχωρήσει κλειδί. Πήγαινε στις Ρυθμίσεις — εκεί γράφει πώς παίρνεις δωρεάν κλειδί χωρίς κάρτα, σε δύο λεπτά.',
+  loading:'Εξετάζω τη φωτογραφία…', try_n:(i,n)=>`Δοκιμή ${i} από ${n}`, retry_wait:'Όλα φορτωμένα — ξαναδοκιμάζω σε λίγα δευτερόλεπτα…',
+  e_busy:'Όλα τα δωρεάν μοντέλα είναι φορτωμένα αυτή τη στιγμή. Ξαναπάτα Ανάλυση σε ένα-δύο λεπτά.',
+  e_key:'Το κλειδί δεν έγινε δεκτό. Έλεγξε ότι το επικόλλησες ολόκληρο (ξεκινά με sk-or-).',
+  e_402:'Η υπηρεσία ζήτησε υπόλοιπο. Δοκίμασε ξανά σε λίγο — τα δωρεάν μοντέλα αλλάζουν συχνά.',
+  e_none:'Κανένα δωρεάν μοντέλο δεν απάντησε αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο.',
+  e_gkey:'Το κλειδί της Google δεν έγινε δεκτό. Χρησιμοποίησε το δωρεάν κλειδί χωρίς κάρτα — δες τις Ρυθμίσεις.',
+  e_limit:'Έπιασες προσωρινά το όριο. Περίμενε ένα λεπτό και ξαναδοκίμασε.',
+  e_server:'Προσωρινό πρόβλημα στην υπηρεσία. Δοκίμασε ξανά.', e_comm:s=>`Σφάλμα επικοινωνίας (${s}).`,
+  e_empty:'Κενή απάντηση — δοκίμασε πιο καθαρή φωτογραφία', e_bad:'Μη αναμενόμενη απάντηση', e_generic:'Κάτι πήγε στραβά: ',
+  conf_hi:'Υψηλή βεβαιότητα', conf_mid:'Μέτρια βεβαιότητα', conf_lo:'Χαμηλή βεβαιότητα',
+  r_code:'Σήμανση στο εξάρτημα', r_dims:'Πιθανές διαστάσεις', r_use:'Πού χρησιμοποιείται', r_with:'Τι χρειάζεται μαζί του', r_buy:'Τι να ζητήσεις', r_alt:'Μήπως είναι…',
+  lib_empty:'Κανένα αποθηκευμένο εξάρτημα ακόμα.<br>Κάθε ανάλυση μπαίνει αυτόματα εδώ.', lib_title:n=>`Αρχείο (${n})`,
+  x_date:'Ημερομηνία', x_from:'Προέλευση', x_code:'Σήμανση', x_dims:'Διαστάσεις', x_with:'Μαζί του', x_buy:'Ζήτα',
+  x_nothing:'Δεν υπάρχει τίποτα για εξαγωγή.', wipe_q:'Να διαγραφούν όλα τα αποθηκευμένα εξαρτήματα;',
+  locale:'el-GR'
+},
+en:{
+  shot_title:'Photograph the part', shot_sub:`Up to ${MAXPH} photos from different angles`,
+  btn_cam:'📷 Camera', btn_gal:'🖼 Gallery', btn_live:'🎥 Live camera in page',
+  btn_snap:'Capture', btn_cancel:'Cancel', btn_clear:'Clear photos', add_more:'Add another',
+  multi_hint:n=>`${n} of ${MAXPH} photos. Take a close-up of any stamped part number — it helps a lot. All photos together count as one analysis.`,
+  ctx_title:'Context', ctx_q:'Where does it come from?',
+  ctx:['Car','Motorcycle','Truck','Plumbing','Electrical','Refrigeration / A/C','Home appliance','Commercial equipment','Furniture / woodwork','Boat','Not sure'],
+  note_l:'Note (optional)', note_ph:'e.g. broke on a water pump, or: found it in a box of spare parts',
+  ref_l:'There is a reference object in the photo (coin, ruler, card)',
+  ref_hint:'Without a reference object, dimensions are only an estimate. Put a 2-euro coin next to it and accuracy improves dramatically.',
+  btn_go:'Analyze',
+  lang_title:'Language', lang_hint:'Changes the whole app and the language of the answers. Items already saved stay in the language they were written in.',
+  key_title:'Access key', key_l:'Free key (no card)',
+  key_help:`<b>How to get it, in two minutes:</b><br>
+    1) Open <b>openrouter.ai</b> and sign in with your Google account.<br>
+    2) Open <b>openrouter.ai/keys</b> → create key → give it any name.<br>
+    3) Copy the key (starts with <b>sk-or-</b>) and paste it here.<br><br>
+    No card needed and no way to be charged: without credit, the service only gives the free models. Limit about 50 analyses per day.<br>
+    Stored only on this device.`,
+  btn_save:'Save', key_saved:'Key saved.', key_deleted:'Key deleted.',
+  data_title:'Data', saved_n:'Saved parts:', btn_export:'Export file', btn_wipe:'Delete all',
+  nav_scan:'Identify', nav_lib:'Library', nav_set:'Settings',
+  cam_file:'⚠ The page was opened as a local file, so the live camera is blocked. Use Camera or Gallery.',
+  cam_insecure:'⚠ The live camera needs a secure connection. Use Camera or Gallery.',
+  cam_denied:e=>`⚠ Camera access was not granted (${e}). Check browser permissions or use the Gallery.`,
+  no_key:'No key entered. Go to Settings — it explains how to get a free key with no card, in two minutes.',
+  loading:'Examining the photo…', try_n:(i,n)=>`Attempt ${i} of ${n}`, retry_wait:'All busy — retrying in a few seconds…',
+  e_busy:'All free models are busy right now. Tap Analyze again in a minute or two.',
+  e_key:'The key was not accepted. Check you pasted all of it (starts with sk-or-).',
+  e_402:'The service asked for credit. Try again shortly — free models change often.',
+  e_none:'No free model answered right now. Try again shortly.',
+  e_gkey:'The Google key was not accepted. Use the free no-card key — see Settings.',
+  e_limit:'Temporarily hit the limit. Wait a minute and try again.',
+  e_server:'Temporary problem with the service. Try again.', e_comm:s=>`Connection error (${s}).`,
+  e_empty:'Empty answer — try a clearer photo', e_bad:'Unexpected answer', e_generic:'Something went wrong: ',
+  conf_hi:'High confidence', conf_mid:'Medium confidence', conf_lo:'Low confidence',
+  r_code:'Marking on the part', r_dims:'Likely dimensions', r_use:'Where it is used', r_with:'What goes with it', r_buy:'What to ask for', r_alt:'Could it be…',
+  lib_empty:'No saved parts yet.<br>Every analysis is added here automatically.', lib_title:n=>`Archive (${n})`,
+  x_date:'Date', x_from:'Source', x_code:'Marking', x_dims:'Dimensions', x_with:'Goes with', x_buy:'Ask for',
+  x_nothing:'Nothing to export.', wipe_q:'Delete all saved parts?',
+  locale:'en-GB'
+}};
 
-/* ─────────── πλοήγηση ─────────── */
+const LS_KEY='exartima_key', LS_LIB='exartima_lib', LS_LANG='idai_lang';
+let LANG = (()=>{ try{ const l=localStorage.getItem(LS_LANG); if(l) return l; }catch{} return (navigator.language||'el').toLowerCase().startsWith('el')?'el':'en'; })();
+const t = (k,...a) => { const v=T[LANG][k]; return typeof v==='function'?v(...a):v; };
+
+function setLang(l){
+  LANG=l; try{ localStorage.setItem(LS_LANG,l); }catch{}
+  document.documentElement.lang=l;
+  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+  document.querySelectorAll('[data-ih]').forEach(e=>e.innerHTML=t(e.dataset.ih));
+  document.querySelectorAll('[data-ip]').forEach(e=>e.placeholder=t(e.dataset.ip));
+  document.querySelectorAll('[data-it]').forEach(e=>e.title=t(e.dataset.it));
+  document.getElementById('langBtn').textContent = l==='el'?'EN':'ΕΛ';
+  document.getElementById('seg-el').classList.toggle('on',l==='el');
+  document.getElementById('seg-en').classList.toggle('on',l==='en');
+  drawChips(); envCheck(); drawGrid();
+  if(lastRes) render(lastRes);
+  if(view==='lib') drawLib();
+}
+
+/* ═══════════ ΚΑΤΑΣΤΑΣΗ ═══════════ */
+let ctxI = -1, imgs = [], view = 'scan', stream = null, lastRes = null;
+const camIn=document.getElementById('camIn'), galIn=document.getElementById('galIn');
+const esc = s => String(s??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
 function go(v){
-  view = v;
+  view=v;
   ['scan','lib','set'].forEach(x=>{
-    document.getElementById('v-'+x).classList.toggle('hidden', x!==v);
-    document.getElementById('n-'+x).classList.toggle('on', x===v);
+    document.getElementById('v-'+x).classList.toggle('hidden',x!==v);
+    document.getElementById('n-'+x).classList.toggle('on',x===v);
   });
   if(v==='lib') drawLib();
-  if(v==='set') document.getElementById('cnt').textContent = lib().length;
+  if(v==='set') document.getElementById('cnt').textContent=lib().length;
   scrollTo(0,0);
 }
 
-/* ─────────── πλαίσιο ─────────── */
-const chipsEl = document.getElementById('chips');
-CTX.forEach(c=>{
-  const b = document.createElement('div');
-  b.className='chip'; b.textContent=c;
-  b.onclick=()=>{ ctx = (ctx===c?'':c); [...chipsEl.children].forEach(x=>x.classList.toggle('on', x.textContent===ctx)); };
-  chipsEl.appendChild(b);
-});
+/* ═══════════ ΠΛΑΙΣΙΟ ═══════════ */
+function drawChips(){
+  const el=document.getElementById('chips'); el.innerHTML='';
+  t('ctx').forEach((c,i)=>{
+    const b=document.createElement('div');
+    b.className='chip'+(i===ctxI?' on':''); b.textContent=c;
+    b.onclick=()=>{ ctxI=(ctxI===i?-1:i); drawChips(); };
+    el.appendChild(b);
+  });
+}
+const ctxLabel = () => ctxI>=0 ? t('ctx')[ctxI] : '';
 
-/* ─────────── φωτογραφία ─────────── */
-const camIn = document.getElementById('camIn');
-const galIn = document.getElementById('galIn');
-let stream = null;
-
-/* έλεγχος περιβάλλοντος */
-(function envCheck(){
-  const secure = location.protocol === 'https:' || location.hostname === 'localhost';
-  const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-  const hint = document.getElementById('camHint');
-  if(!secure || !hasCam){
-    document.getElementById('liveBtn').classList.add('hidden');
-    hint.innerHTML = location.protocol === 'file:'
-      ? '⚠ Η σελίδα άνοιξε ως τοπικό αρχείο, γι\' αυτό η κάμερα είναι κλειδωμένη από το ίδιο το κινητό. Ανέβασέ την στο GitHub Pages όπως τις άλλες εφαρμογές σου και θα δουλέψει κανονικά. Μέχρι τότε χρησιμοποίησε τη Συλλογή.'
-      : '⚠ Η ζωντανή κάμερα απαιτεί ασφαλή σύνδεση. Χρησιμοποίησε Κάμερα ή Συλλογή.';
-  }
-})();
+/* ═══════════ ΦΩΤΟΓΡΑΦΙΕΣ ═══════════ */
+function envCheck(){
+  const secure = location.protocol==='https:' || location.hostname==='localhost';
+  const ok = secure && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  document.querySelectorAll('.liveOnly').forEach(b=>b.classList.toggle('hidden',!ok));
+  document.querySelectorAll('.camHint').forEach(h=>h.innerHTML = ok ? '' : (location.protocol==='file:'?t('cam_file'):t('cam_insecure')));
+}
 
 async function liveCam(){
   try{
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
-    const v = document.getElementById('vid');
-    v.srcObject = stream; await v.play();
+    const v=document.getElementById('vid'); v.srcObject=stream; await v.play();
     document.getElementById('shotBox').classList.add('hidden');
+    document.getElementById('prevBox').classList.add('hidden');
     document.getElementById('liveBox').classList.remove('hidden');
   }catch(err){
-    document.getElementById('camHint').innerHTML =
-      '⚠ Δεν δόθηκε πρόσβαση στην κάμερα ('+esc(err.name)+'). Έλεγξε τα δικαιώματα του περιηγητή ή χρησιμοποίησε τη Συλλογή.';
+    document.querySelectorAll('.camHint').forEach(h=>h.innerHTML=t('cam_denied',esc(err.name)));
   }
 }
-
 function stopCam(){
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
+  if(stream){ stream.getTracks().forEach(x=>x.stop()); stream=null; }
   document.getElementById('liveBox').classList.add('hidden');
-  if(!img) document.getElementById('shotBox').classList.remove('hidden');
+  drawGrid();
 }
-
 function snap(){
-  const v = document.getElementById('vid');
-  const cv = document.createElement('canvas');
-  const max = 1400, r = Math.min(1, max/Math.max(v.videoWidth, v.videoHeight));
-  cv.width = v.videoWidth*r; cv.height = v.videoHeight*r;
+  const v=document.getElementById('vid'), cv=document.createElement('canvas');
+  const r=Math.min(1,1400/Math.max(v.videoWidth,v.videoHeight));
+  cv.width=v.videoWidth*r; cv.height=v.videoHeight*r;
   cv.getContext('2d').drawImage(v,0,0,cv.width,cv.height);
-  setShot(cv.toDataURL('image/jpeg',0.85));
+  addImg(cv.toDataURL('image/jpeg',0.85));
   stopCam();
 }
-
-function setShot(dataUrl){
-  img = dataUrl;
-  document.getElementById('preview').src = img;
-  document.getElementById('shotBox').classList.add('hidden');
-  document.getElementById('prevBox').classList.remove('hidden');
-  document.getElementById('goBtn').disabled = false;
-  document.getElementById('out').innerHTML = '';
+function addImg(d){
+  if(imgs.length>=MAXPH) return;
+  imgs.push(d); lastRes=null;
+  document.getElementById('out').innerHTML='';
+  drawGrid();
 }
-
 function loadShot(e){
-  const f = e.target.files[0]; if(!f) return;
-  const fr = new FileReader();
-  fr.onload = () => {
-    const im = new Image();
-    im.onload = () => {
-      const max = 1400;
-      let w = im.width, h = im.height;
-      if(w > max || h > max){ const r = max/Math.max(w,h); w = Math.round(w*r); h = Math.round(h*r); }
-      const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
-      cv.getContext('2d').drawImage(im,0,0,w,h);
-      setShot(cv.toDataURL('image/jpeg', 0.85));
+  const files=[...e.target.files].slice(0,MAXPH-imgs.length);
+  files.forEach(f=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const im=new Image();
+      im.onload=()=>{
+        let w=im.width,h=im.height; const max=1400;
+        if(w>max||h>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+        const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(im,0,0,w,h);
+        addImg(cv.toDataURL('image/jpeg',0.85));
+      };
+      im.src=fr.result;
     };
-    im.src = fr.result;
-  };
-  fr.readAsDataURL(f);
-  e.target.value = '';
+    fr.readAsDataURL(f);
+  });
+  e.target.value='';
+}
+function removeImg(i){ imgs.splice(i,1); drawGrid(); }
+function clearShot(){ imgs=[]; lastRes=null; document.getElementById('out').innerHTML=''; drawGrid(); }
+
+function drawGrid(){
+  const has=imgs.length>0;
+  if(!stream){
+    document.getElementById('shotBox').classList.toggle('hidden',has);
+    document.getElementById('prevBox').classList.toggle('hidden',!has);
+  }
+  document.getElementById('goBtn').disabled=!has;
+  if(!has) return;
+  let h=imgs.map((d,i)=>`<div class="ph"><img src="${d}" alt=""><span class="n">${i+1}</span><button class="x" onclick="removeImg(${i})">✕</button></div>`).join('');
+  if(imgs.length<MAXPH){
+    h+=`<div class="add"><span>${esc(t('add_more'))}</span>
+      <button class="btn sec" onclick="camIn.click()">${esc(t('btn_cam'))}</button>
+      <button class="btn sec" onclick="galIn.click()">${esc(t('btn_gal'))}</button>
+      <button class="btn sec liveOnly" onclick="liveCam()">🎥</button></div>`;
+  }
+  document.getElementById('grid').innerHTML=h;
+  document.getElementById('multiHint').textContent=t('multi_hint',imgs.length);
+  envCheck();
 }
 
-function clearShot(){
-  img = null;
-  document.getElementById('liveBox').classList.add('hidden');
-  document.getElementById('shotBox').classList.remove('hidden');
-  document.getElementById('prevBox').classList.add('hidden');
-  document.getElementById('goBtn').disabled = true;
-  document.getElementById('out').innerHTML = '';
-}
-
-/* ─────────── κλειδί ─────────── */
-function getKey(){ return (localStorage.getItem(LS_KEY) || '').replace(/[\s"'`]/g,''); }
+/* ═══════════ ΚΛΕΙΔΙ ═══════════ */
+const clean = k => (k||'').replace(/[\s"'`]/g,'');
+function getKey(){ try{ return clean(localStorage.getItem(LS_KEY)); }catch{ return ''; } }
 function saveKey(){
-  const k = document.getElementById('key').value.replace(/[\s"'`]/g,'');
-  localStorage.setItem(LS_KEY, k);
-  alert(k ? 'Το κλειδί αποθηκεύτηκε.' : 'Το κλειδί διαγράφηκε.');
+  const k=clean(document.getElementById('key').value);
+  try{ localStorage.setItem(LS_KEY,k); }catch{}
+  alert(k?t('key_saved'):t('key_deleted'));
 }
-document.getElementById('key').value = getKey();
+document.getElementById('key').value=getKey();
 
-/* ─────────── ανάλυση ─────────── */
-const PROMPT = `Είσαι έμπειρος τεχνίτης και υπεύθυνος ανταλλακτικών. Σου δίνω φωτογραφία ενός εξαρτήματος.
+/* ═══════════ ΟΔΗΓΙΕΣ ΠΡΟΣ ΤΟ ΜΟΝΤΕΛΟ ═══════════ */
+function buildPrompt(){
+  const n=imgs.length;
+  if(LANG==='en'){
+    let p=`You are an experienced technician and parts specialist. I am giving you ${n>1?n+' photos of the SAME part from different angles':'a photo of a part'}.
+
+Reply ONLY with valid JSON, no other text, in this form:
+{
+ "onoma": "short name of the part",
+ "vevaiotita": "ypsili" | "metria" | "xamili",
+ "perigrafi": "2-3 sentences: what exactly it is and how you recognised it",
+ "kodikos": "code/marking readable on the part, or empty",
+ "diastaseis": [{"onoma":"e.g. Outer diameter","timi":"e.g. ~22 mm"}],
+ "diastaseis_simeiosi": "one sentence on how reliable the measurement is",
+ "xrisi": ["where it is used, 2-4 items"],
+ "synodeutika": ["what is needed with it: washers, seals, materials, tools"],
+ "agora": "exactly what to ask for at the shop, in one sentence",
+ "alternatives": [{"onoma":"alternative identification","logos":"why it might be this"}]
+}
+("ypsili" = high, "metria" = medium, "xamili" = low confidence. Keep the JSON keys exactly as written.)
+
+Rules:
+- All text values in English only.
+- Units in millimetres or inches, whichever is customary for this kind of part.
+- Do not invent a code if it is not clearly visible; leave it empty.
+- Give 1 to 3 alternatives unless you are completely certain.
+- If the photo does not show a recognisable part, set vevaiotita to "xamili" and explain in perigrafi.
+
+Extra context from the user:
+- Source: ${ctxLabel()||'not given'}`;
+    const note=document.getElementById('note').value.trim(); if(note) p+=`\n- Note: ${note}`;
+    p+=document.getElementById('refChk').checked
+      ? '\n- There IS a reference object of known size in the photo. Find it and scale dimensions accordingly (2-euro coin: 25.75 mm — 1-euro coin: 23.25 mm — bank card: 85.6 × 54 mm).'
+      : '\n- There is NO reference object. Give a range estimate and say so clearly in diastaseis_simeiosi.';
+    return p;
+  }
+  let p=`Είσαι έμπειρος τεχνίτης και υπεύθυνος ανταλλακτικών. Σου δίνω ${n>1?n+' φωτογραφίες του ΙΔΙΟΥ εξαρτήματος από διαφορετικές γωνίες':'φωτογραφία ενός εξαρτήματος'}.
 
 Απάντησε ΜΟΝΟ με έγκυρο JSON, χωρίς κανένα άλλο κείμενο, στη μορφή:
 {
@@ -348,222 +502,176 @@ const PROMPT = `Είσαι έμπειρος τεχνίτης και υπεύθυ
 - Μονάδες σε χιλιοστά ή ίντσες, όπως συνηθίζεται στο συγκεκριμένο είδος.
 - Μην εφευρίσκεις κωδικό αν δεν φαίνεται καθαρά· άφησέ τον κενό.
 - Δώσε 1 έως 3 εναλλακτικές εκδοχές, εκτός αν είσαι απόλυτα σίγουρος.
-- Αν η φωτογραφία δεν δείχνει αναγνωρίσιμο εξάρτημα, βάλε vevaiotita "xamili" και εξήγησέ το στην perigrafi.`;
+- Αν η φωτογραφία δεν δείχνει αναγνωρίσιμο εξάρτημα, βάλε vevaiotita "xamili" και εξήγησέ το στην perigrafi.
 
-async function analyze(){
-  const key = getKey();
-  const out = document.getElementById('out');
-  if(!key){
-    out.innerHTML = '<div class="err">Δεν έχεις καταχωρήσει κλειδί. Πήγαινε στις Ρυθμίσεις — εκεί γράφει πώς παίρνεις δωρεάν κλειδί χωρίς κάρτα, σε δύο λεπτά.</div>';
-    return;
-  }
-  document.getElementById('goBtn').disabled = true;
-  out.innerHTML = '<div class="card load"><div class="spin"></div>Εξετάζω τη φωτογραφία…</div>';
-
-  let extra = '\n\nΠρόσθετο πλαίσιο από τον χρήστη:';
-  extra += ctx ? `\n- Προέλευση: ${ctx}` : '\n- Προέλευση: δεν δόθηκε';
-  const n = document.getElementById('note').value.trim();
-  if(n) extra += `\n- Σημείωση: ${n}`;
-  extra += document.getElementById('refChk').checked
+Πρόσθετο πλαίσιο από τον χρήστη:
+- Προέλευση: ${ctxLabel()||'δεν δόθηκε'}`;
+  const note=document.getElementById('note').value.trim(); if(note) p+=`\n- Σημείωση: ${note}`;
+  p+=document.getElementById('refChk').checked
     ? '\n- ΥΠΑΡΧΕΙ αντικείμενο αναφοράς γνωστού μεγέθους στη φωτογραφία. Εντόπισέ το και υπολόγισε τις διαστάσεις αναλογικά (κέρμα 2 ευρώ: 25,75 χιλ. — κέρμα 1 ευρώ: 23,25 χιλ. — τραπεζική κάρτα: 85,6 × 54 χιλ.).'
     : '\n- ΔΕΝ υπάρχει αντικείμενο αναφοράς. Δώσε εκτίμηση εύρους και πες το καθαρά στο πεδίο diastaseis_simeiosi.';
+  return p;
+}
 
-  const b64 = img.split(',')[1];
+/* ═══════════ ΑΝΑΛΥΣΗ ═══════════ */
+function showErr(msg,raw){
+  document.getElementById('out').innerHTML=`<div class="err"><b>${esc(msg)}</b>${raw?`<div style="margin-top:6px;font-size:12.5px;opacity:.75;word-break:break-all">${esc(String(raw).slice(0,220))}</div>`:''}</div>`;
+  document.getElementById('goBtn').disabled=false;
+}
+
+async function analyze(){
+  const key=getKey(), out=document.getElementById('out');
+  if(!key){ showErr(t('no_key')); return; }
+  document.getElementById('goBtn').disabled=true;
+  out.innerHTML=`<div class="card load"><div class="spin"></div>${esc(t('loading'))}</div>`;
+  const PROMPT=buildPrompt();
+  const setLoad = h => { const l=document.querySelector('#out .load'); if(l) l.innerHTML=h; };
 
   try{
-    let txt = '';
+    let txt='';
     if(key.startsWith('sk-or-')){
-      /* ── δωρεάν δρόμος: OpenRouter, χωρίς κάρτα ── */
-      /* ζωντανή λίστα δωρεάν μοντέλων που βλέπουν εικόνα */
-      let MODELS = ['openrouter/free'];
+      let MODELS=['openrouter/free'];
       try{
-        const lr = await fetch('https://openrouter.ai/api/v1/models');
-        const lj = await lr.json();
-        const live = (lj.data||[]).filter(m=>
-          String(m.id).endsWith(':free') &&
-          (m.architecture?.input_modalities||[]).includes('image') &&
-          !/safety|guard/i.test(m.id)
-        ).map(m=>m.id);
+        const lj=await (await fetch('https://openrouter.ai/api/v1/models')).json();
+        const live=(lj.data||[]).filter(m=>String(m.id).endsWith(':free') &&
+          (m.architecture?.input_modalities||[]).includes('image') && !/safety|guard/i.test(m.id)).map(m=>m.id);
         for(let i=live.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [live[i],live[j]]=[live[j],live[i]]; }
-        MODELS = MODELS.concat(live);
+        MODELS=MODELS.concat(live);
       }catch{}
-      MODELS = [...new Set(MODELS.concat(['google/gemma-4-31b-it:free','qwen/qwen3.8-27b:free','google/gemma-4-26b-a4b-it:free']))].slice(0,12);
+      MODELS=[...new Set(MODELS.concat(['google/gemma-4-31b-it:free','qwen/qwen3.8-27b:free','google/gemma-4-26b-a4b-it:free']))].slice(0,12);
 
-      const loadTxt = document.querySelector('#out .load');
-      let last = null;
-      for(let round=0; round<2 && !(txt && txt.includes('{')); round++){
-        if(round===1){
-          if(loadTxt) loadTxt.innerHTML = '<div class="spin"></div>Όλα φορτωμένα — ξαναδοκιμάζω σε λίγα δευτερόλεπτα…';
-          await new Promise(r=>setTimeout(r,6000));
-        }
+      const content=[{type:'text',text:PROMPT}].concat(imgs.map(d=>({type:'image_url',image_url:{url:d}})));
+      let last=null, stop=false;
+      for(let round=0; round<2 && !txt && !stop; round++){
+        if(round===1){ setLoad(`<div class="spin"></div>${esc(t('retry_wait'))}`); await new Promise(r=>setTimeout(r,6000)); }
         for(let i=0;i<MODELS.length;i++){
-          const model = MODELS[i];
-          if(loadTxt) loadTxt.innerHTML = `<div class="spin"></div>Εξετάζω τη φωτογραφία…<div class="hint">Δοκιμή ${i+1} από ${MODELS.length}</div>`;
+          setLoad(`<div class="spin"></div>${esc(t('loading'))}<div class="hint">${esc(t('try_n',i+1,MODELS.length))}</div>`);
           let r;
           try{
-            r = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+            r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
               method:'POST',
               headers:{'content-type':'application/json','authorization':'Bearer '+key,'X-Title':'Identify-AI'},
-              body: JSON.stringify({
-                model, temperature:0.2, max_tokens:2000,
-                messages:[{role:'user',content:[
-                  {type:'text',text:PROMPT+extra},
-                  {type:'image_url',image_url:{url:img}}
-                ]}]
-              })
+              body:JSON.stringify({model:MODELS[i],temperature:0.2,max_tokens:2000,messages:[{role:'user',content}]})
             });
           }catch(e){ last={status:0,t:e.message}; continue; }
           if(r.ok){
-            const d = await r.json();
-            let c = d.choices?.[0]?.message?.content || '';
-            if(Array.isArray(c)) c = c.map(x=>x.text||'').join('');
-            if(c && c.includes('{')){ txt = c; break; }
-            last = {status:0, t:(d.error?.message)||('κενή απάντηση από '+model)};
-            continue;
+            const d=await r.json();
+            let c=d.choices?.[0]?.message?.content||'';
+            if(Array.isArray(c)) c=c.map(x=>x.text||'').join('');
+            if(c && c.includes('{')){ txt=c; break; }
+            last={status:0,t:d.error?.message||'empty: '+MODELS[i]}; continue;
           }
-          last = {status:r.status, t:await r.text()};
-          if(r.status===401) { round=9; break; }
+          last={status:r.status,t:await r.text()};
+          if(r.status===401){ stop=true; break; }
         }
       }
-      if(!txt || !txt.includes('{')){
-        const st = last?.status;
-        let msg = 'Κανένα δωρεάν μοντέλο δεν απάντησε αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο.';
-        if(st===401) msg = 'Το κλειδί δεν έγινε δεκτό. Έλεγξε ότι το επικόλλησες ολόκληρο (ξεκινά με sk-or-).';
-        if(st===429) msg = 'Όλα τα δωρεάν μοντέλα είναι φορτωμένα αυτή τη στιγμή. Ξαναπάτα Ανάλυση σε ένα-δύο λεπτά.';
-        if(st===402) msg = 'Η υπηρεσία ζήτησε υπόλοιπο. Δοκίμασε ξανά σε λίγο — τα δωρεάν μοντέλα αλλάζουν συχνά.';
-        out.innerHTML = `<div class="err"><b>${msg}</b><div style="margin-top:6px;font-size:12.5px;opacity:.75;word-break:break-all">${esc(String(last?.t||'').slice(0,220))}</div></div>`;
-        document.getElementById('goBtn').disabled = false;
+      if(!txt){
+        const st=last?.status;
+        showErr(st===401?t('e_key'):st===429?t('e_busy'):st===402?t('e_402'):t('e_none'), last?.t);
         return;
       }
     } else {
-      /* ── Google ── */
-      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-      const body = JSON.stringify({
-        contents:[{parts:[
-          {inline_data:{mime_type:'image/jpeg', data:b64}},
-          {text: PROMPT+extra}
-        ]}],
-        generationConfig:{ temperature:0.2, maxOutputTokens:2000, responseMimeType:'application/json' }
+      const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+      const body=JSON.stringify({
+        contents:[{parts:imgs.map(d=>({inline_data:{mime_type:'image/jpeg',data:d.split(',')[1]}})).concat([{text:PROMPT}])}],
+        generationConfig:{temperature:0.2,maxOutputTokens:2000,responseMimeType:'application/json'}
       });
-      let r = await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body});
-      if(r.status===401 || r.status===400 || r.status===403){
-        const r2 = await fetch(url+'?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body});
-        if(r2.ok || r2.status===429 || r2.status>=500) r = r2;
+      let r=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body});
+      if([400,401,403].includes(r.status)){
+        const r2=await fetch(url+'?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body});
+        if(r2.ok||r2.status===429||r2.status>=500) r=r2;
       }
       if(!r.ok){
-        const t = await r.text();
-        let msg = 'Σφάλμα επικοινωνίας ('+r.status+').';
-        if(r.status===401 || r.status===400 || r.status===403) msg = 'Το κλειδί της Google δεν έγινε δεκτό. Χρησιμοποίησε το δωρεάν κλειδί χωρίς κάρτα — δες τις Ρυθμίσεις.';
-        if(r.status===429) msg = 'Έπιασες προσωρινά το όριο. Περίμενε ένα λεπτό και ξαναδοκίμασε.';
-        if(r.status>=500) msg = 'Προσωρινό πρόβλημα στην υπηρεσία. Δοκίμασε ξανά.';
-        out.innerHTML = `<div class="err"><b>${msg}</b><div style="margin-top:6px;font-size:12.5px;opacity:.75;word-break:break-all">${esc(t.slice(0,220))}</div></div>`;
-        document.getElementById('goBtn').disabled = false;
+        const raw=await r.text();
+        showErr([400,401,403].includes(r.status)?t('e_gkey'):r.status===429?t('e_limit'):r.status>=500?t('e_server'):t('e_comm',r.status), raw);
         return;
       }
-      const d = await r.json();
-      txt = (d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+      const d=await r.json();
+      txt=(d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
     }
-    if(!txt) throw new Error('Κενή απάντηση — δοκίμασε πιο καθαρή φωτογραφία');
-    const s = txt.indexOf('{'), e = txt.lastIndexOf('}');
-    if(s<0||e<0) throw new Error('Μη αναμενόμενη απάντηση');
-    const res = JSON.parse(txt.slice(s,e+1));
-    render(res);
-    save(res);
-  }catch(err){
-    out.innerHTML = '<div class="err">Κάτι πήγε στραβά: '+esc(err.message)+'</div>';
-  }
-  document.getElementById('goBtn').disabled = false;
+    if(!txt) throw new Error(t('e_empty'));
+    const s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+    if(s<0||e<0) throw new Error(t('e_bad'));
+    const res=JSON.parse(txt.slice(s,e+1));
+    res._lang=LANG;
+    lastRes=res; render(res); save(res);
+  }catch(err){ showErr(t('e_generic')+err.message); return; }
+  document.getElementById('goBtn').disabled=false;
 }
 
-/* ─────────── εμφάνιση ─────────── */
-function esc(s){ return String(s??'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
-
+/* ═══════════ ΕΜΦΑΝΙΣΗ ═══════════ */
 function render(r){
-  const cm = {ypsili:['c-hi','●','Υψηλή βεβαιότητα'],metria:['c-mid','◐','Μέτρια βεβαιότητα'],xamili:['c-lo','○','Χαμηλή βεβαιότητα']};
-  const c = cm[r.vevaiotita] || cm.metria;
-  let h = `<div class="card res"><h3>${esc(r.onoma)}</h3>
-    <div class="conf ${c[0]}">${c[1]} ${c[2]}</div>
-    <div>${esc(r.perigrafi)}</div>`;
-
-  if(r.kodikos) h += `<div class="blk"><h4>Σήμανση στο εξάρτημα</h4><div style="font-family:ui-monospace,monospace;font-size:16px">${esc(r.kodikos)}</div></div>`;
-
+  const cm={ypsili:['c-hi','●',t('conf_hi')],metria:['c-mid','◐',t('conf_mid')],xamili:['c-lo','○',t('conf_lo')]};
+  const c=cm[r.vevaiotita]||cm.metria;
+  let h=`<div class="card res"><h3>${esc(r.onoma)}</h3><div class="conf ${c[0]}">${c[1]} ${esc(c[2])}</div><div>${esc(r.perigrafi)}</div>`;
+  if(r.kodikos) h+=`<div class="blk"><h4>${esc(t('r_code'))}</h4><div style="font-family:ui-monospace,monospace;font-size:16px">${esc(r.kodikos)}</div></div>`;
   if(r.diastaseis?.length){
-    h += `<div class="blk"><h4>Πιθανές διαστάσεις</h4>`;
-    r.diastaseis.forEach(d=> h += `<div class="kv"><b>${esc(d.onoma)}</b><span>${esc(d.timi)}</span></div>`);
-    if(r.diastaseis_simeiosi) h += `<div class="hint">${esc(r.diastaseis_simeiosi)}</div>`;
-    h += `</div>`;
+    h+=`<div class="blk"><h4>${esc(t('r_dims'))}</h4>`;
+    r.diastaseis.forEach(d=>h+=`<div class="kv"><b>${esc(d.onoma)}</b><span>${esc(d.timi)}</span></div>`);
+    if(r.diastaseis_simeiosi) h+=`<div class="hint">${esc(r.diastaseis_simeiosi)}</div>`;
+    h+=`</div>`;
   }
-  if(r.xrisi?.length) h += `<div class="blk"><h4>Πού χρησιμοποιείται</h4><ul>${r.xrisi.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
-  if(r.synodeutika?.length) h += `<div class="blk"><h4>Τι χρειάζεται μαζί του</h4><ul>${r.synodeutika.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
-  if(r.agora) h += `<div class="blk"><h4>Τι να ζητήσεις</h4><div>${esc(r.agora)}</div></div>`;
+  if(r.xrisi?.length) h+=`<div class="blk"><h4>${esc(t('r_use'))}</h4><ul>${r.xrisi.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if(r.synodeutika?.length) h+=`<div class="blk"><h4>${esc(t('r_with'))}</h4><ul>${r.synodeutika.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if(r.agora) h+=`<div class="blk"><h4>${esc(t('r_buy'))}</h4><div>${esc(r.agora)}</div></div>`;
   if(r.alternatives?.length){
-    h += `<div class="blk"><h4>Μήπως είναι…</h4>`;
-    r.alternatives.forEach(a=> h += `<div class="alt"><b>${esc(a.onoma)}</b><small>${esc(a.logos)}</small></div>`);
-    h += `</div>`;
+    h+=`<div class="blk"><h4>${esc(t('r_alt'))}</h4>`;
+    r.alternatives.forEach(a=>h+=`<div class="alt"><b>${esc(a.onoma)}</b><small>${esc(a.logos)}</small></div>`);
+    h+=`</div>`;
   }
-  h += `</div>`;
-  document.getElementById('out').innerHTML = h;
+  document.getElementById('out').innerHTML=h+`</div>`;
 }
 
-/* ─────────── βιβλιοθήκη ─────────── */
+/* ═══════════ ΒΙΒΛΙΟΘΗΚΗ ═══════════ */
 function lib(){ try{ return JSON.parse(localStorage.getItem(LS_LIB)||'[]'); }catch{ return []; } }
-
 function save(res){
-  const cv = document.createElement('canvas'), im = new Image();
-  im.onload = () => {
-    const s = 150, r = Math.min(s/im.width, s/im.height);
-    cv.width = im.width*r; cv.height = im.height*r;
+  const cv=document.createElement('canvas'), im=new Image(), ctx=ctxLabel();
+  im.onload=()=>{
+    const s=150, r=Math.min(s/im.width,s/im.height);
+    cv.width=im.width*r; cv.height=im.height*r;
     cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
-    const l = lib();
-    l.unshift({id:Date.now(), thumb:cv.toDataURL('image/jpeg',0.6), ctx, date:new Date().toISOString(), res});
-    try{ localStorage.setItem(LS_LIB, JSON.stringify(l.slice(0,120))); }catch{}
+    const l=lib();
+    l.unshift({id:Date.now(),thumb:cv.toDataURL('image/jpeg',0.6),ctx,date:new Date().toISOString(),res});
+    try{ localStorage.setItem(LS_LIB,JSON.stringify(l.slice(0,120))); }catch{}
   };
-  im.src = img;
+  im.src=imgs[0];
 }
-
 function drawLib(){
-  const l = lib(), el = document.getElementById('libList');
-  if(!l.length){ el.innerHTML = '<div class="card"><div class="empty">Κανένα αποθηκευμένο εξάρτημα ακόμα.<br>Κάθε ανάλυση μπαίνει αυτόματα εδώ.</div></div>'; return; }
-  el.innerHTML = `<div class="card"><h2>Αρχείο (${l.length})</h2>` + l.map(it=>{
-    const d = new Date(it.date).toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    return `<div class="lib" onclick="openIt(${it.id})">
-      <img src="${it.thumb}" alt="">
+  const l=lib(), el=document.getElementById('libList');
+  if(!l.length){ el.innerHTML=`<div class="card"><div class="empty">${t('lib_empty')}</div></div>`; return; }
+  el.innerHTML=`<div class="card"><h2>${esc(t('lib_title',l.length))}</h2>`+l.map(it=>{
+    const d=new Date(it.date).toLocaleDateString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric'});
+    return `<div class="lib" onclick="openIt(${it.id})"><img src="${it.thumb}" alt="">
       <div class="t"><b>${esc(it.res.onoma)}</b><small>${d}${it.ctx?' · '+esc(it.ctx):''}</small></div>
       <span style="color:var(--dim)">›</span></div>`;
-  }).join('') + `</div>`;
+  }).join('')+`</div>`;
 }
-
 function openIt(id){
-  const it = lib().find(x=>x.id===id); if(!it) return;
-  go('scan');
-  setShot(it.thumb);
-  render(it.res);
+  const it=lib().find(x=>x.id===id); if(!it) return;
+  go('scan'); imgs=[it.thumb]; drawGrid();
+  lastRes=it.res; render(it.res);
   setTimeout(()=>document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'}),120);
 }
-
 function exportLib(){
-  const l = lib();
-  if(!l.length){ alert('Δεν υπάρχει τίποτα για εξαγωγή.'); return; }
-  const txt = l.map(it=>{
-    const r = it.res, d = new Date(it.date).toLocaleDateString('el-GR');
-    let s = `═══ ${r.onoma} ═══\nΗμερομηνία: ${d}${it.ctx?'\nΠροέλευση: '+it.ctx:''}\n${r.perigrafi}\n`;
-    if(r.kodikos) s += `Σήμανση: ${r.kodikos}\n`;
-    if(r.diastaseis?.length) s += 'Διαστάσεις: ' + r.diastaseis.map(x=>x.onoma+' '+x.timi).join(' | ') + '\n';
-    if(r.synodeutika?.length) s += 'Μαζί του: ' + r.synodeutika.join(', ') + '\n';
-    if(r.agora) s += `Ζήτα: ${r.agora}\n`;
+  const l=lib(); if(!l.length){ alert(t('x_nothing')); return; }
+  const txt=l.map(it=>{
+    const r=it.res, d=new Date(it.date).toLocaleDateString(t('locale'));
+    let s=`═══ ${r.onoma} ═══\n${t('x_date')}: ${d}${it.ctx?`\n${t('x_from')}: ${it.ctx}`:''}\n${r.perigrafi}\n`;
+    if(r.kodikos) s+=`${t('x_code')}: ${r.kodikos}\n`;
+    if(r.diastaseis?.length) s+=`${t('x_dims')}: `+r.diastaseis.map(x=>x.onoma+' '+x.timi).join(' | ')+'\n';
+    if(r.synodeutika?.length) s+=`${t('x_with')}: `+r.synodeutika.join(', ')+'\n';
+    if(r.agora) s+=`${t('x_buy')}: ${r.agora}\n`;
     return s;
   }).join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
-  a.download = "identify-ai.txt"; a.click();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+  a.download='identify-ai.txt'; a.click();
+}
+function wipe(){
+  if(confirm(t('wipe_q'))){ try{ localStorage.removeItem(LS_LIB); }catch{} drawLib(); document.getElementById('cnt').textContent=0; }
 }
 
-function wipe(){
-  if(confirm('Να διαγραφούν όλα τα αποθηκευμένα εξαρτήματα;')){
-    localStorage.removeItem(LS_LIB); drawLib();
-    document.getElementById('cnt').textContent = 0;
-  }
-}
+setLang(LANG);
 </script>
 </body>
 </html>
