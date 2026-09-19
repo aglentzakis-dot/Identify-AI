@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Τι Εξάρτημα;</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔩</text></svg>">
+<meta name="theme-color" content="#16181d">
+<style>
+  :root{
+    --bg:#101215; --panel:#191c22; --panel2:#21252e; --line:#2e343f;
+    --txt:#e9ecf1; --dim:#98a1b0; --acc:#f0a02a; --acc2:#3a7bd5;
+    --ok:#3fbf7f; --warn:#e0b341; --bad:#e2685d;
+    --r:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--txt);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    padding:0 0 90px; max-width:720px; margin:0 auto;
+  }
+  header{
+    position:sticky; top:0; z-index:20; background:rgba(16,18,21,.94);
+    backdrop-filter:blur(8px); border-bottom:1px solid var(--line);
+    padding:14px 16px; display:flex; align-items:center; gap:10px;
+  }
+  header h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.2px;flex:1}
+  header .em{font-size:22px}
+  .iconbtn{
+    background:var(--panel2); border:1px solid var(--line); color:var(--dim);
+    width:38px;height:38px;border-radius:11px;font-size:17px;cursor:pointer;
+    display:grid;place-items:center;
+  }
+  main{padding:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+  .card h2{font-size:15px;margin:0 0 12px;font-weight:600;color:var(--dim);letter-spacing:.3px;text-transform:uppercase}
+  label{display:block;font-size:13px;color:var(--dim);margin:0 0 6px}
+  input[type=text],input[type=password],select,textarea{
+    width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:11px 12px;font:inherit;font-size:15px;
+  }
+  textarea{resize:vertical;min-height:62px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  .btn{
+    display:block;width:100%;padding:15px;border-radius:12px;border:none;
+    background:var(--acc);color:#1a1205;font:inherit;font-weight:700;font-size:16px;cursor:pointer;
+  }
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line);font-weight:600}
+  .btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line);font-weight:600}
+  .row{display:flex;gap:10px}
+  .row>*{flex:1}
+  .shot{
+    border:2px dashed var(--line); border-radius:var(--r); padding:34px 16px;
+    text-align:center; color:var(--dim); cursor:pointer; background:var(--panel);
+  }
+  .shot .big{font-size:40px;display:block;margin-bottom:8px}
+  .shot strong{color:var(--txt);display:block;font-size:16px;margin-bottom:4px}
+  .shot small{font-size:13px}
+  #preview{width:100%;border-radius:var(--r);display:block;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{
+    padding:8px 13px;border-radius:999px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--dim);font-size:14px;cursor:pointer;
+  }
+  .chip.on{background:var(--acc);border-color:var(--acc);color:#1a1205;font-weight:600}
+  .sw{display:flex;align-items:center;gap:11px;padding:11px 0;cursor:pointer}
+  .sw input{width:19px;height:19px;accent-color:var(--acc);flex:none}
+  .sw span{font-size:14.5px;line-height:1.35}
+  .hint{font-size:13px;color:var(--dim);margin-top:8px;line-height:1.45}
+  .res h3{margin:0 0 4px;font-size:21px;font-weight:700}
+  .conf{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;margin-bottom:12px}
+  .c-hi{background:rgba(63,191,127,.15);color:var(--ok)}
+  .c-mid{background:rgba(224,179,65,.15);color:var(--warn)}
+  .c-lo{background:rgba(226,104,93,.15);color:var(--bad)}
+  .blk{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+  .blk h4{margin:0 0 7px;font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  .blk ul{margin:0;padding-left:19px}
+  .blk li{margin-bottom:5px}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:15px}
+  .kv:last-child{border-bottom:none}
+  .kv b{font-weight:600;color:var(--dim);font-size:14px}
+  .alt{background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:14.5px}
+  .alt b{display:block;margin-bottom:2px}
+  .alt small{color:var(--dim)}
+  .load{text-align:center;padding:34px 16px;color:var(--dim)}
+  .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;margin:0 auto 14px;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .err{background:rgba(226,104,93,.1);border:1px solid rgba(226,104,93,.4);color:#f3a49c;border-radius:12px;padding:13px;font-size:14.5px}
+  .hidden{display:none!important}
+  .lib{display:flex;gap:12px;align-items:center;padding:11px;background:var(--panel2);border-radius:12px;margin-bottom:9px;cursor:pointer}
+  .lib img{width:56px;height:56px;object-fit:cover;border-radius:9px;flex:none;background:var(--bg)}
+  .lib .t{flex:1;min-width:0}
+  .lib .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lib .t small{color:var(--dim);font-size:12.5px}
+  .empty{text-align:center;color:var(--dim);padding:26px 10px;font-size:14.5px}
+  nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:20;
+    background:rgba(16,18,21,.96);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);display:flex;
+    padding-bottom:env(safe-area-inset-bottom);max-width:720px;margin:0 auto;
+  }
+  nav button{
+    flex:1;background:none;border:none;color:var(--dim);
+    padding:11px 4px 13px;font:inherit;font-size:11.5px;cursor:pointer;
+  }
+  nav button i{display:block;font-size:21px;font-style:normal;margin-bottom:2px}
+  nav button.on{color:var(--acc)}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="em">🔩</span>
+  <h1>Τι Εξάρτημα;</h1>
+  <button class="iconbtn" onclick="go('set')" title="Ρυθμίσεις">⚙</button>
+</header>
+
+<main>
+
+<!-- ══ ΑΝΑΓΝΩΡΙΣΗ ══ -->
+<section id="v-scan">
+  <div id="shotBox" class="shot">
+    <span class="big">📷</span>
+    <strong>Φωτογράφισε το εξάρτημα</strong>
+    <small style="display:block;margin-bottom:14px">Διάλεξε τρόπο</small>
+    <div class="row">
+      <button class="btn sec" onclick="camIn.click()">📷 Κάμερα</button>
+      <button class="btn sec" onclick="galIn.click()">🖼 Συλλογή</button>
+    </div>
+    <button class="btn sec" id="liveBtn" style="margin-top:9px" onclick="liveCam()">🎥 Ζωντανή κάμερα στη σελίδα</button>
+    <div class="hint" id="camHint" style="text-align:left"></div>
+  </div>
+
+  <div id="liveBox" class="hidden">
+    <video id="vid" playsinline autoplay muted style="width:100%;border-radius:var(--r);border:1px solid var(--line);display:block;background:#000"></video>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" onclick="snap()">Λήψη</button>
+      <button class="btn sec" onclick="stopCam()">Άκυρο</button>
+    </div>
+  </div>
+
+  <div id="prevBox" class="hidden">
+    <img id="preview" alt="">
+    <div class="row" style="margin-top:10px">
+      <button class="btn sec" onclick="clearShot()">Άλλη φωτογραφία</button>
+    </div>
+  </div>
+  <input type="file" id="camIn" accept="image/*" capture="environment" class="hidden" onchange="loadShot(event)">
+  <input type="file" id="galIn" accept="image/*" class="hidden" onchange="loadShot(event)">
+
+  <div class="card" style="margin-top:14px">
+    <h2>Πλαίσιο</h2>
+    <label>Από πού προέρχεται;</label>
+    <div class="chips" id="chips"></div>
+    <div style="margin-top:14px">
+      <label>Σημείωση (προαιρετικά)</label>
+      <textarea id="note" placeholder="π.χ. έσπασε σε αντλία νερού, ή: το βρήκα σε κουτί με ανταλλακτικά"></textarea>
+    </div>
+    <div class="sw" onclick="event.target.tagName!=='INPUT'&&(refChk.checked=!refChk.checked)">
+      <input type="checkbox" id="refChk">
+      <span>Υπάρχει αντικείμενο αναφοράς στη φωτογραφία (κέρμα, χάρακας, κάρτα)</span>
+    </div>
+    <div class="hint">Χωρίς αντικείμενο αναφοράς οι διαστάσεις είναι απλή εκτίμηση. Βάλε ένα κέρμα των 2 ευρώ δίπλα και η ακρίβεια ανεβαίνει κατακόρυφα.</div>
+  </div>
+
+  <button class="btn" id="goBtn" onclick="analyze()" disabled>Ανάλυση</button>
+
+  <div id="out" style="margin-top:14px"></div>
+</section>
+
+<!-- ══ ΒΙΒΛΙΟΘΗΚΗ ══ -->
+<section id="v-lib" class="hidden">
+  <div id="libList"></div>
+</section>
+
+<!-- ══ ΡΥΘΜΙΣΕΙΣ ══ -->
+<section id="v-set" class="hidden">
+  <div class="card">
+    <h2>Κλειδί πρόσβασης</h2>
+    <label>Προσωπικό κλειδί</label>
+    <input type="password" id="key" placeholder="sk-ant-..." autocomplete="off">
+    <div class="hint">Αποθηκεύεται μόνο σε αυτή τη συσκευή και δεν φεύγει πουθενά αλλού εκτός από την υπηρεσία ανάλυσης. Το βγάζεις από τη σελίδα λογαριασμού σου.</div>
+    <button class="btn" style="margin-top:12px" onclick="saveKey()">Αποθήκευση</button>
+  </div>
+  <div class="card">
+    <h2>Δεδομένα</h2>
+    <div class="hint" style="margin:0 0 12px">Αποθηκευμένα εξαρτήματα: <b id="cnt">0</b></div>
+    <button class="btn sec" onclick="exportLib()">Εξαγωγή αρχείου</button>
+    <button class="btn danger" style="margin-top:9px" onclick="wipe()">Διαγραφή όλων</button>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button id="n-scan" class="on" onclick="go('scan')"><i>📷</i>Αναγνώριση</button>
+  <button id="n-lib" onclick="go('lib')"><i>📚</i>Βιβλιοθήκη</button>
+  <button id="n-set" onclick="go('set')"><i>⚙</i>Ρυθμίσεις</button>
+</nav>
+
+<script>
+/* ─────────── κατάσταση ─────────── */
+const CTX = ['Αυτοκίνητο','Μηχανή','Φορτηγό','Υδραυλικά','Ηλεκτρολογικά','Ψύξη / κλιματισμός',
+             'Οικιακή συσκευή','Επαγγελματικός εξοπλισμός','Έπιπλο / ξυλουργική','Σκάφος','Δεν ξέρω'];
+let ctx = '', img = null, view = 'scan';
+const LS_KEY = 'exartima_key', LS_LIB = 'exartima_lib';
+
+/* ─────────── πλοήγηση ─────────── */
+function go(v){
+  view = v;
+  ['scan','lib','set'].forEach(x=>{
+    document.getElementById('v-'+x).classList.toggle('hidden', x!==v);
+    document.getElementById('n-'+x).classList.toggle('on', x===v);
+  });
+  if(v==='lib') drawLib();
+  if(v==='set') document.getElementById('cnt').textContent = lib().length;
+  scrollTo(0,0);
+}
+
+/* ─────────── πλαίσιο ─────────── */
+const chipsEl = document.getElementById('chips');
+CTX.forEach(c=>{
+  const b = document.createElement('div');
+  b.className='chip'; b.textContent=c;
+  b.onclick=()=>{ ctx = (ctx===c?'':c); [...chipsEl.children].forEach(x=>x.classList.toggle('on', x.textContent===ctx)); };
+  chipsEl.appendChild(b);
+});
+
+/* ─────────── φωτογραφία ─────────── */
+const camIn = document.getElementById('camIn');
+const galIn = document.getElementById('galIn');
+let stream = null;
+
+/* έλεγχος περιβάλλοντος */
+(function envCheck(){
+  const secure = location.protocol === 'https:' || location.hostname === 'localhost';
+  const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const hint = document.getElementById('camHint');
+  if(!secure || !hasCam){
+    document.getElementById('liveBtn').classList.add('hidden');
+    hint.innerHTML = location.protocol === 'file:'
+      ? '⚠ Η σελίδα άνοιξε ως τοπικό αρχείο, γι\' αυτό η κάμερα είναι κλειδωμένη από το ίδιο το κινητό. Ανέβασέ την στο GitHub Pages όπως τις άλλες εφαρμογές σου και θα δουλέψει κανονικά. Μέχρι τότε χρησιμοποίησε τη Συλλογή.'
+      : '⚠ Η ζωντανή κάμερα απαιτεί ασφαλή σύνδεση. Χρησιμοποίησε Κάμερα ή Συλλογή.';
+  }
+})();
+
+async function liveCam(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+    const v = document.getElementById('vid');
+    v.srcObject = stream; await v.play();
+    document.getElementById('shotBox').classList.add('hidden');
+    document.getElementById('liveBox').classList.remove('hidden');
+  }catch(err){
+    document.getElementById('camHint').innerHTML =
+      '⚠ Δεν δόθηκε πρόσβαση στην κάμερα ('+esc(err.name)+'). Έλεγξε τα δικαιώματα του περιηγητή ή χρησιμοποίησε τη Συλλογή.';
+  }
+}
+
+function stopCam(){
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
+  document.getElementById('liveBox').classList.add('hidden');
+  if(!img) document.getElementById('shotBox').classList.remove('hidden');
+}
+
+function snap(){
+  const v = document.getElementById('vid');
+  const cv = document.createElement('canvas');
+  const max = 1400, r = Math.min(1, max/Math.max(v.videoWidth, v.videoHeight));
+  cv.width = v.videoWidth*r; cv.height = v.videoHeight*r;
+  cv.getContext('2d').drawImage(v,0,0,cv.width,cv.height);
+  setShot(cv.toDataURL('image/jpeg',0.85));
+  stopCam();
+}
+
+function setShot(dataUrl){
+  img = dataUrl;
+  document.getElementById('preview').src = img;
+  document.getElementById('shotBox').classList.add('hidden');
+  document.getElementById('prevBox').classList.remove('hidden');
+  document.getElementById('goBtn').disabled = false;
+  document.getElementById('out').innerHTML = '';
+}
+
+function loadShot(e){
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const max = 1400;
+      let w = im.width, h = im.height;
+      if(w > max || h > max){ const r = max/Math.max(w,h); w = Math.round(w*r); h = Math.round(h*r); }
+      const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(im,0,0,w,h);
+      setShot(cv.toDataURL('image/jpeg', 0.85));
+    };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+  e.target.value = '';
+}
+
+function clearShot(){
+  img = null;
+  document.getElementById('liveBox').classList.add('hidden');
+  document.getElementById('shotBox').classList.remove('hidden');
+  document.getElementById('prevBox').classList.add('hidden');
+  document.getElementById('goBtn').disabled = true;
+  document.getElementById('out').innerHTML = '';
+}
+
+/* ─────────── κλειδί ─────────── */
+function getKey(){ return localStorage.getItem(LS_KEY) || ''; }
+function saveKey(){
+  const k = document.getElementById('key').value.trim();
+  localStorage.setItem(LS_KEY, k);
+  alert(k ? 'Το κλειδί αποθηκεύτηκε.' : 'Το κλειδί διαγράφηκε.');
+}
+document.getElementById('key').value = getKey();
+
+/* ─────────── ανάλυση ─────────── */
+const PROMPT = `Είσαι έμπειρος τεχνίτης και υπεύθυνος ανταλλακτικών. Σου δίνω φωτογραφία ενός εξαρτήματος.
+
+Απάντησε ΜΟΝΟ με έγκυρο JSON, χωρίς κανένα άλλο κείμενο, στη μορφή:
+{
+ "onoma": "σύντομη ονομασία του εξαρτήματος στα ελληνικά",
+ "vevaiotita": "ypsili" | "metria" | "xamili",
+ "perigrafi": "2-3 προτάσεις: τι ακριβώς είναι και πώς το κατάλαβες",
+ "kodikos": "κωδικός/σήμανση που διαβάζεται πάνω στο εξάρτημα, ή κενό",
+ "diastaseis": [{"onoma":"π.χ. Εξωτερική διάμετρος","timi":"π.χ. ~22 χιλ."}],
+ "diastaseis_simeiosi": "μία πρόταση για το πόσο αξιόπιστη είναι η μέτρηση",
+ "xrisi": ["πού χρησιμοποιείται, 2-4 σημεία"],
+ "synodeutika": ["τι χρειάζεται μαζί του: ροδέλες, τσιμούχες, υλικά, εργαλεία"],
+ "agora": "τι ακριβώς να ζητήσει κάποιος από το κατάστημα, σε μία πρόταση",
+ "alternatives": [{"onoma":"εναλλακτική εκδοχή","logos":"γιατί ίσως είναι αυτό"}]
+}
+
+Κανόνες:
+- Όλα τα κείμενα αποκλειστικά στα ελληνικά, χωρίς ξένες λέξεις όπου υπάρχει ελληνικός όρος.
+- Μονάδες σε χιλιοστά ή ίντσες, όπως συνηθίζεται στο συγκεκριμένο είδος.
+- Μην εφευρίσκεις κωδικό αν δεν φαίνεται καθαρά· άφησέ τον κενό.
+- Δώσε 1 έως 3 εναλλακτικές εκδοχές, εκτός αν είσαι απόλυτα σίγουρος.
+- Αν η φωτογραφία δεν δείχνει αναγνωρίσιμο εξάρτημα, βάλε vevaiotita "xamili" και εξήγησέ το στην perigrafi.`;
+
+async function analyze(){
+  const key = getKey();
+  const out = document.getElementById('out');
+  if(!key){
+    out.innerHTML = '<div class="err">Δεν έχεις καταχωρήσει κλειδί πρόσβασης. Πήγαινε στις Ρυθμίσεις.</div>';
+    return;
+  }
+  document.getElementById('goBtn').disabled = true;
+  out.innerHTML = '<div class="card load"><div class="spin"></div>Εξετάζω τη φωτογραφία…</div>';
+
+  let extra = '\n\nΠρόσθετο πλαίσιο από τον χρήστη:';
+  extra += ctx ? `\n- Προέλευση: ${ctx}` : '\n- Προέλευση: δεν δόθηκε';
+  const n = document.getElementById('note').value.trim();
+  if(n) extra += `\n- Σημείωση: ${n}`;
+  extra += document.getElementById('refChk').checked
+    ? '\n- ΥΠΑΡΧΕΙ αντικείμενο αναφοράς γνωστού μεγέθους στη φωτογραφία. Εντόπισέ το και υπολόγισε τις διαστάσεις αναλογικά (κέρμα 2 ευρώ: 25,75 χιλ. — κέρμα 1 ευρώ: 23,25 χιλ. — τραπεζική κάρτα: 85,6 × 54 χιλ.).'
+    : '\n- ΔΕΝ υπάρχει αντικείμενο αναφοράς. Δώσε εκτίμηση εύρους και πες το καθαρά στο πεδίο diastaseis_simeiosi.';
+
+  const b64 = img.split(',')[1];
+
+  try{
+    const r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-5',
+        max_tokens:1600,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:PROMPT+extra}
+        ]}]
+      })
+    });
+
+    if(!r.ok){
+      const t = await r.text();
+      let msg = 'Σφάλμα επικοινωνίας ('+r.status+').';
+      if(r.status===401) msg = 'Το κλειδί δεν έγινε δεκτό. Έλεγξέ το στις Ρυθμίσεις.';
+      if(r.status===429) msg = 'Πολλά αιτήματα ή εξαντλημένο υπόλοιπο. Δοκίμασε σε λίγο.';
+      if(r.status>=500) msg = 'Προσωρινό πρόβλημα στην υπηρεσία. Δοκίμασε ξανά.';
+      out.innerHTML = `<div class="err"><b>${msg}</b><div style="margin-top:6px;font-size:12.5px;opacity:.75;word-break:break-all">${esc(t.slice(0,220))}</div></div>`;
+      document.getElementById('goBtn').disabled = false;
+      return;
+    }
+
+    const d = await r.json();
+    let txt = (d.content||[]).map(c=>c.text||'').join('');
+    const s = txt.indexOf('{'), e = txt.lastIndexOf('}');
+    if(s<0||e<0) throw new Error('Μη αναμενόμενη απάντηση');
+    const res = JSON.parse(txt.slice(s,e+1));
+    render(res);
+    save(res);
+  }catch(err){
+    out.innerHTML = '<div class="err">Κάτι πήγε στραβά: '+esc(err.message)+'</div>';
+  }
+  document.getElementById('goBtn').disabled = false;
+}
+
+/* ─────────── εμφάνιση ─────────── */
+function esc(s){ return String(s??'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+
+function render(r){
+  const cm = {ypsili:['c-hi','●','Υψηλή βεβαιότητα'],metria:['c-mid','◐','Μέτρια βεβαιότητα'],xamili:['c-lo','○','Χαμηλή βεβαιότητα']};
+  const c = cm[r.vevaiotita] || cm.metria;
+  let h = `<div class="card res"><h3>${esc(r.onoma)}</h3>
+    <div class="conf ${c[0]}">${c[1]} ${c[2]}</div>
+    <div>${esc(r.perigrafi)}</div>`;
+
+  if(r.kodikos) h += `<div class="blk"><h4>Σήμανση στο εξάρτημα</h4><div style="font-family:ui-monospace,monospace;font-size:16px">${esc(r.kodikos)}</div></div>`;
+
+  if(r.diastaseis?.length){
+    h += `<div class="blk"><h4>Πιθανές διαστάσεις</h4>`;
+    r.diastaseis.forEach(d=> h += `<div class="kv"><b>${esc(d.onoma)}</b><span>${esc(d.timi)}</span></div>`);
+    if(r.diastaseis_simeiosi) h += `<div class="hint">${esc(r.diastaseis_simeiosi)}</div>`;
+    h += `</div>`;
+  }
+  if(r.xrisi?.length) h += `<div class="blk"><h4>Πού χρησιμοποιείται</h4><ul>${r.xrisi.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if(r.synodeutika?.length) h += `<div class="blk"><h4>Τι χρειάζεται μαζί του</h4><ul>${r.synodeutika.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if(r.agora) h += `<div class="blk"><h4>Τι να ζητήσεις</h4><div>${esc(r.agora)}</div></div>`;
+  if(r.alternatives?.length){
+    h += `<div class="blk"><h4>Μήπως είναι…</h4>`;
+    r.alternatives.forEach(a=> h += `<div class="alt"><b>${esc(a.onoma)}</b><small>${esc(a.logos)}</small></div>`);
+    h += `</div>`;
+  }
+  h += `</div>`;
+  document.getElementById('out').innerHTML = h;
+}
+
+/* ─────────── βιβλιοθήκη ─────────── */
+function lib(){ try{ return JSON.parse(localStorage.getItem(LS_LIB)||'[]'); }catch{ return []; } }
+
+function save(res){
+  const cv = document.createElement('canvas'), im = new Image();
+  im.onload = () => {
+    const s = 150, r = Math.min(s/im.width, s/im.height);
+    cv.width = im.width*r; cv.height = im.height*r;
+    cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+    const l = lib();
+    l.unshift({id:Date.now(), thumb:cv.toDataURL('image/jpeg',0.6), ctx, date:new Date().toISOString(), res});
+    try{ localStorage.setItem(LS_LIB, JSON.stringify(l.slice(0,120))); }catch{}
+  };
+  im.src = img;
+}
+
+function drawLib(){
+  const l = lib(), el = document.getElementById('libList');
+  if(!l.length){ el.innerHTML = '<div class="card"><div class="empty">Κανένα αποθηκευμένο εξάρτημα ακόμα.<br>Κάθε ανάλυση μπαίνει αυτόματα εδώ.</div></div>'; return; }
+  el.innerHTML = `<div class="card"><h2>Αρχείο (${l.length})</h2>` + l.map(it=>{
+    const d = new Date(it.date).toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    return `<div class="lib" onclick="openIt(${it.id})">
+      <img src="${it.thumb}" alt="">
+      <div class="t"><b>${esc(it.res.onoma)}</b><small>${d}${it.ctx?' · '+esc(it.ctx):''}</small></div>
+      <span style="color:var(--dim)">›</span></div>`;
+  }).join('') + `</div>`;
+}
+
+function openIt(id){
+  const it = lib().find(x=>x.id===id); if(!it) return;
+  go('scan');
+  setShot(it.thumb);
+  render(it.res);
+  setTimeout(()=>document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'}),120);
+}
+
+function exportLib(){
+  const l = lib();
+  if(!l.length){ alert('Δεν υπάρχει τίποτα για εξαγωγή.'); return; }
+  const txt = l.map(it=>{
+    const r = it.res, d = new Date(it.date).toLocaleDateString('el-GR');
+    let s = `═══ ${r.onoma} ═══\nΗμερομηνία: ${d}${it.ctx?'\nΠροέλευση: '+it.ctx:''}\n${r.perigrafi}\n`;
+    if(r.kodikos) s += `Σήμανση: ${r.kodikos}\n`;
+    if(r.diastaseis?.length) s += 'Διαστάσεις: ' + r.diastaseis.map(x=>x.onoma+' '+x.timi).join(' | ') + '\n';
+    if(r.synodeutika?.length) s += 'Μαζί του: ' + r.synodeutika.join(', ') + '\n';
+    if(r.agora) s += `Ζήτα: ${r.agora}\n`;
+    return s;
+  }).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+  a.download = 'exartimata.txt'; a.click();
+}
+
+function wipe(){
+  if(confirm('Να διαγραφούν όλα τα αποθηκευμένα εξαρτήματα;')){
+    localStorage.removeItem(LS_LIB); drawLib();
+    document.getElementById('cnt').textContent = 0;
+  }
+}
+</script>
+</body>
+</html>
