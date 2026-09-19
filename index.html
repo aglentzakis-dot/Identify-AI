@@ -107,7 +107,7 @@
   }
   nav button i{display:block;font-size:21px;font-style:normal;margin-bottom:2px}
   nav button.on{color:var(--acc)}
-  .langbtn{width:auto;padding:0 12px;font-size:13px;font-weight:700;color:var(--txt);letter-spacing:.5px}
+  .langbtn{width:auto;padding:0 10px;font-size:22px;line-height:1;gap:0}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .grid .ph{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel2)}
   .grid .ph img{width:100%;height:100%;object-fit:cover;display:block}
@@ -125,7 +125,7 @@
 <header>
   <span class="em">🔩</span>
   <h1>Identify-AI</h1>
-  <button class="iconbtn langbtn" id="langBtn" onclick="setLang(LANG==='el'?'en':'el')">EN</button>
+  <button class="iconbtn langbtn" id="langBtn" onclick="setLang(LANG==='el'?'en':'el')">🇬🇧</button>
   <button class="iconbtn" onclick="go('set')" data-it="nav_set">⚙</button>
 </header>
 
@@ -191,8 +191,8 @@
   <div class="card">
     <h2 data-i="lang_title"></h2>
     <div class="seg">
-      <button id="seg-el" onclick="setLang('el')">Ελληνικά</button>
-      <button id="seg-en" onclick="setLang('en')">English</button>
+      <button id="seg-el" onclick="setLang('el')">🇬🇷 Ελληνικά</button>
+      <button id="seg-en" onclick="setLang('en')">🇬🇧 English</button>
     </div>
     <div class="hint" data-i="lang_hint"></div>
   </div>
@@ -319,7 +319,9 @@ function setLang(l){
   document.querySelectorAll('[data-ih]').forEach(e=>e.innerHTML=t(e.dataset.ih));
   document.querySelectorAll('[data-ip]').forEach(e=>e.placeholder=t(e.dataset.ip));
   document.querySelectorAll('[data-it]').forEach(e=>e.title=t(e.dataset.it));
-  document.getElementById('langBtn').textContent = l==='el'?'EN':'ΕΛ';
+  const lb=document.getElementById('langBtn');
+  lb.textContent = l==='el'?'🇬🇧':'🇬🇷';
+  lb.title = l==='el'?'English':'Ελληνικά';
   document.getElementById('seg-el').classList.toggle('on',l==='el');
   document.getElementById('seg-en').classList.toggle('on',l==='en');
   drawChips(); envCheck(); drawGrid();
