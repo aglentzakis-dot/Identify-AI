@@ -374,36 +374,62 @@ async function analyze(){
     let txt = '';
     if(key.startsWith('sk-or-')){
       /* ── δωρεάν δρόμος: OpenRouter, χωρίς κάρτα ── */
-      const MODELS = ['openrouter/free','google/gemma-4-31b-it:free','qwen/qwen3.8-27b:free','google/gemma-4-26b-a4b-it:free'];
+      /* ζωντανή λίστα δωρεάν μοντέλων που βλέπουν εικόνα */
+      let MODELS = ['openrouter/free'];
+      try{
+        const lr = await fetch('https://openrouter.ai/api/v1/models');
+        const lj = await lr.json();
+        const live = (lj.data||[]).filter(m=>
+          String(m.id).endsWith(':free') &&
+          (m.architecture?.input_modalities||[]).includes('image') &&
+          !/safety|guard/i.test(m.id)
+        ).map(m=>m.id);
+        for(let i=live.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [live[i],live[j]]=[live[j],live[i]]; }
+        MODELS = MODELS.concat(live);
+      }catch{}
+      MODELS = [...new Set(MODELS.concat(['google/gemma-4-31b-it:free','qwen/qwen3.8-27b:free','google/gemma-4-26b-a4b-it:free']))].slice(0,12);
+
+      const loadTxt = document.querySelector('#out .load');
       let last = null;
-      for(const model of MODELS){
-        const r = await fetch('https://openrouter.ai/api/v1/chat/completions',{
-          method:'POST',
-          headers:{'content-type':'application/json','authorization':'Bearer '+key,'X-Title':'Identify-AI'},
-          body: JSON.stringify({
-            model, temperature:0.2, max_tokens:2000,
-            messages:[{role:'user',content:[
-              {type:'text',text:PROMPT+extra},
-              {type:'image_url',image_url:{url:img}}
-            ]}]
-          })
-        });
-        if(r.ok){
-          const d = await r.json();
-          txt = d.choices?.[0]?.message?.content || '';
-          if(Array.isArray(txt)) txt = txt.map(x=>x.text||'').join('');
-          if(txt && txt.includes('{')) break;
-          last = {status:0, t:'κενή απάντηση από '+model};
-          continue;
+      for(let round=0; round<2 && !(txt && txt.includes('{')); round++){
+        if(round===1){
+          if(loadTxt) loadTxt.innerHTML = '<div class="spin"></div>Όλα φορτωμένα — ξαναδοκιμάζω σε λίγα δευτερόλεπτα…';
+          await new Promise(r=>setTimeout(r,6000));
         }
-        last = {status:r.status, t:await r.text()};
-        if(r.status===401) break;          // λάθος κλειδί, δεν έχει νόημα να συνεχίσει
+        for(let i=0;i<MODELS.length;i++){
+          const model = MODELS[i];
+          if(loadTxt) loadTxt.innerHTML = `<div class="spin"></div>Εξετάζω τη φωτογραφία…<div class="hint">Δοκιμή ${i+1} από ${MODELS.length}</div>`;
+          let r;
+          try{
+            r = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+              method:'POST',
+              headers:{'content-type':'application/json','authorization':'Bearer '+key,'X-Title':'Identify-AI'},
+              body: JSON.stringify({
+                model, temperature:0.2, max_tokens:2000,
+                messages:[{role:'user',content:[
+                  {type:'text',text:PROMPT+extra},
+                  {type:'image_url',image_url:{url:img}}
+                ]}]
+              })
+            });
+          }catch(e){ last={status:0,t:e.message}; continue; }
+          if(r.ok){
+            const d = await r.json();
+            let c = d.choices?.[0]?.message?.content || '';
+            if(Array.isArray(c)) c = c.map(x=>x.text||'').join('');
+            if(c && c.includes('{')){ txt = c; break; }
+            last = {status:0, t:(d.error?.message)||('κενή απάντηση από '+model)};
+            continue;
+          }
+          last = {status:r.status, t:await r.text()};
+          if(r.status===401) { round=9; break; }
+        }
       }
       if(!txt || !txt.includes('{')){
         const st = last?.status;
         let msg = 'Κανένα δωρεάν μοντέλο δεν απάντησε αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο.';
         if(st===401) msg = 'Το κλειδί δεν έγινε δεκτό. Έλεγξε ότι το επικόλλησες ολόκληρο (ξεκινά με sk-or-).';
-        if(st===429) msg = 'Έπιασες το δωρεάν όριο. Περίμενε λίγο και ξαναδοκίμασε.';
+        if(st===429) msg = 'Όλα τα δωρεάν μοντέλα είναι φορτωμένα αυτή τη στιγμή. Ξαναπάτα Ανάλυση σε ένα-δύο λεπτά.';
         if(st===402) msg = 'Η υπηρεσία ζήτησε υπόλοιπο. Δοκίμασε ξανά σε λίγο — τα δωρεάν μοντέλα αλλάζουν συχνά.';
         out.innerHTML = `<div class="err"><b>${msg}</b><div style="margin-top:6px;font-size:12.5px;opacity:.75;word-break:break-all">${esc(String(last?.t||'').slice(0,220))}</div></div>`;
         document.getElementById('goBtn').disabled = false;
