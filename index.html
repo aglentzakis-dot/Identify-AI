@@ -118,6 +118,23 @@
   .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:3px}
   .seg button{flex:1;border:none;background:none;color:var(--dim);padding:10px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer}
   .seg button.on{background:var(--acc);color:#1a1205}
+  .folder{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 12px}
+  .folder .fi{font-size:20px}
+  .folder .fn{flex:1;font-weight:600;font-size:15px;word-break:break-word}
+  .folder .fn.none{color:var(--dim);font-weight:400}
+  .bkitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;margin-top:8px;cursor:pointer;width:100%;text-align:left;color:var(--txt);font:inherit}
+  .bkitem .nm{flex:1;min-width:0;font-size:14px;word-break:break-all}
+  .bkitem small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
+  .badge{background:var(--acc);color:#1a1205;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .okmsg{background:rgba(63,191,127,.12);border:1px solid rgba(63,191,127,.4);color:#8fe0b5;border-radius:12px;padding:12px;font-size:14.5px;margin-top:10px}
+  #bkMsg .err{margin-top:10px}
+  .srch{position:relative;margin-bottom:12px}
+  .srch input{padding-left:38px}
+  .srch .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:15px}
+  .lib .del{flex:none;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--bad);font-size:15px;cursor:pointer}
+  .acts{display:flex;gap:8px;margin-top:14px}
+  .acts button{flex:1;padding:12px;font-size:14.5px}
+  .savedtag{font-size:12.5px;color:var(--dim);margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -125,7 +142,7 @@
 <header>
   <span class="em">🔩</span>
   <h1>Identify-AI</h1>
-  <button class="iconbtn langbtn" id="langBtn" onclick="setLang(LANG==='el'?'en':'el')">🇬🇧</button>
+  <button class="iconbtn langbtn" id="langBtn" onclick="setLang(LANG==='el'?'en':'el')">🇬🇷</button>
   <button class="iconbtn" onclick="go('set')" data-it="nav_set">⚙</button>
 </header>
 
@@ -204,9 +221,25 @@
     <button class="btn" style="margin-top:12px" onclick="saveKey()" data-i="btn_save"></button>
   </div>
   <div class="card">
+    <h2 data-i="bk_title"></h2>
+    <div id="bkFolderRow" class="folder">
+      <span class="fi">📁</span>
+      <span id="bkFolder" class="fn"></span>
+      <button class="iconbtn" id="bkClear" onclick="clearFolder()" data-it="bk_clear_t">✕</button>
+    </div>
+    <button class="btn sec" id="bkPick" style="margin-top:10px" onclick="pickFolderBtn()"></button>
+    <div class="hint" id="bkHint"></div>
+  </div>
+  <div class="card">
     <h2 data-i="data_title"></h2>
     <div class="hint" style="margin:0 0 12px"><span data-i="saved_n"></span> <b id="cnt">0</b></div>
-    <button class="btn sec" onclick="exportLib()" data-i="btn_export"></button>
+    <button class="btn" onclick="backupBtn()" data-i="btn_backup"></button>
+    <button class="btn sec" style="margin-top:9px" onclick="restoreList()" data-i="btn_restore_dir"></button>
+    <button class="btn sec" style="margin-top:9px" onclick="restoreIn.click()" data-i="btn_restore_file"></button>
+    <input type="file" id="restoreIn" accept=".json,application/json" class="hidden" onchange="restoreFromFile(event)">
+    <div id="bkMsg"></div>
+    <div id="bkList"></div>
+    <button class="btn sec" style="margin-top:9px" onclick="exportLib()" data-i="btn_export"></button>
     <button class="btn danger" style="margin-top:9px" onclick="wipe()" data-i="btn_wipe"></button>
   </div>
 </section>
@@ -243,6 +276,18 @@ el:{
     Δεν χρειάζεται κάρτα και δεν υπάρχει τρόπος να χρεωθείς: χωρίς υπόλοιπο, η υπηρεσία δίνει μόνο τα δωρεάν μοντέλα. Όριο περίπου 50 αναλύσεις την ημέρα.<br>
     Αποθηκεύεται μόνο σε αυτή τη συσκευή.`,
   btn_save:'Αποθήκευση', key_saved:'Το κλειδί αποθηκεύτηκε.', key_deleted:'Το κλειδί διαγράφηκε.',
+  bk_title:'Φάκελος αντιγράφων', bk_none:'Δεν έχει οριστεί φάκελος',
+  bk_pick:'📁 Επιλογή φακέλου', bk_change:'📁 Αλλαγή φακέλου', bk_clear_t:'Διακοπή χρήσης φακέλου',
+  bk_hint:'Ο φάκελος είναι κοινός για όλες σου τις εφαρμογές στο aglentzakis-dot.github.io. Κάθε εφαρμογή γράφει μόνο στον δικό της υποφάκελο. Ένα αρχείο ανά ημέρα, και ενημερώνεται αυτόματα μετά από κάθε ανάλυση.',
+  bk_unsup:'Αυτός ο περιηγητής δεν υποστηρίζει κοινό φάκελο (π.χ. iPhone ή Firefox). Τα αντίγραφα κατεβαίνουν ως κανονικά αρχεία στις Λήψεις.',
+  bk_clear_q:'Να σταματήσει η χρήση του φακέλου;\n\nΠροσοχή: ο φάκελος είναι κοινός, οπότε θα σταματήσει να χρησιμοποιείται από ΟΛΕΣ τις εφαρμογές σου. Τα αρχεία δεν σβήνονται.',
+  btn_backup:'💾 Αποθήκευση αντιγράφου τώρα', btn_restore_dir:'📂 Επαναφορά από τον φάκελο', btn_restore_file:'📄 Επαναφορά από αρχείο',
+  bk_ok_dir:(f)=>`Το αντίγραφο αποθηκεύτηκε στον φάκελο: ${f}`, bk_ok_dl:'Ο φάκελος δεν ήταν διαθέσιμος — το αντίγραφο κατέβηκε ως αρχείο στις Λήψεις.',
+  bk_nodir:'Δεν έχει οριστεί φάκελος αντιγράφων. Πάτα πρώτα «Επιλογή φακέλου» παραπάνω, ή χρησιμοποίησε την «Επαναφορά από αρχείο».',
+  bk_noperm:'Δεν δόθηκε άδεια πρόσβασης στον φάκελο.', bk_empty:'Δεν υπάρχουν ακόμα αντίγραφα στον φάκελο.',
+  bk_newest:'νεότερο', bk_items:n=>`${n} εξαρτήματα`,
+  bk_restore_q:(n,f)=>`Επαναφορά από «${f}»;\n\nΗ τωρινή βιβλιοθήκη θα αντικατασταθεί με ${n} εξαρτήματα.`,
+  bk_restored:n=>`Έγινε επαναφορά: ${n} εξαρτήματα.`, bk_bad:'Το αρχείο δεν είναι έγκυρο αντίγραφο του Identify-AI.',
   data_title:'Δεδομένα', saved_n:'Αποθηκευμένα εξαρτήματα:', btn_export:'Εξαγωγή αρχείου', btn_wipe:'Διαγραφή όλων',
   nav_scan:'Αναγνώριση', nav_lib:'Βιβλιοθήκη', nav_set:'Ρυθμίσεις',
   cam_file:'⚠ Η σελίδα άνοιξε ως τοπικό αρχείο, γι\' αυτό η ζωντανή κάμερα είναι κλειδωμένη. Χρησιμοποίησε Κάμερα ή Συλλογή.',
@@ -260,6 +305,10 @@ el:{
   e_empty:'Κενή απάντηση — δοκίμασε πιο καθαρή φωτογραφία', e_bad:'Μη αναμενόμενη απάντηση', e_generic:'Κάτι πήγε στραβά: ',
   conf_hi:'Υψηλή βεβαιότητα', conf_mid:'Μέτρια βεβαιότητα', conf_lo:'Χαμηλή βεβαιότητα',
   r_code:'Σήμανση στο εξάρτημα', r_dims:'Πιθανές διαστάσεις', r_use:'Πού χρησιμοποιείται', r_with:'Τι χρειάζεται μαζί του', r_buy:'Τι να ζητήσεις', r_alt:'Μήπως είναι…',
+  srch_ph:'Αναζήτηση στη βιβλιοθήκη…', lib_nores:'Κανένα αποτέλεσμα για την αναζήτηση.',
+  del_q:n=>`Να διαγραφεί «${n}» από τη βιβλιοθήκη;`, del_t:'Διαγραφή',
+  act_copy:'📋 Αντιγραφή', act_share:'📤 Κοινοποίηση', copied:'Αντιγράφηκε!',
+  saved_on:(d)=>`Αποθηκευμένο: ${d}`,
   lib_empty:'Κανένα αποθηκευμένο εξάρτημα ακόμα.<br>Κάθε ανάλυση μπαίνει αυτόματα εδώ.', lib_title:n=>`Αρχείο (${n})`,
   x_date:'Ημερομηνία', x_from:'Προέλευση', x_code:'Σήμανση', x_dims:'Διαστάσεις', x_with:'Μαζί του', x_buy:'Ζήτα',
   x_nothing:'Δεν υπάρχει τίποτα για εξαγωγή.', wipe_q:'Να διαγραφούν όλα τα αποθηκευμένα εξαρτήματα;',
@@ -285,6 +334,18 @@ en:{
     No card needed and no way to be charged: without credit, the service only gives the free models. Limit about 50 analyses per day.<br>
     Stored only on this device.`,
   btn_save:'Save', key_saved:'Key saved.', key_deleted:'Key deleted.',
+  bk_title:'Backup folder', bk_none:'No folder set',
+  bk_pick:'📁 Choose folder', bk_change:'📁 Change folder', bk_clear_t:'Stop using folder',
+  bk_hint:'The folder is shared by all your apps on aglentzakis-dot.github.io. Each app writes only to its own subfolder. One file per day, updated automatically after every analysis.',
+  bk_unsup:'This browser does not support a shared folder (e.g. iPhone or Firefox). Backups are downloaded as normal files to Downloads.',
+  bk_clear_q:'Stop using the folder?\n\nWarning: the folder is shared, so it will stop being used by ALL your apps. Files are not deleted.',
+  btn_backup:'💾 Save backup now', btn_restore_dir:'📂 Restore from folder', btn_restore_file:'📄 Restore from file',
+  bk_ok_dir:(f)=>`Backup saved to folder: ${f}`, bk_ok_dl:'The folder was not available — the backup was downloaded as a file to Downloads.',
+  bk_nodir:'No backup folder set. Tap "Choose folder" above first, or use "Restore from file".',
+  bk_noperm:'Folder access was not granted.', bk_empty:'No backups in the folder yet.',
+  bk_newest:'newest', bk_items:n=>`${n} parts`,
+  bk_restore_q:(n,f)=>`Restore from "${f}"?\n\nThe current library will be replaced with ${n} parts.`,
+  bk_restored:n=>`Restored: ${n} parts.`, bk_bad:'This file is not a valid Identify-AI backup.',
   data_title:'Data', saved_n:'Saved parts:', btn_export:'Export file', btn_wipe:'Delete all',
   nav_scan:'Identify', nav_lib:'Library', nav_set:'Settings',
   cam_file:'⚠ The page was opened as a local file, so the live camera is blocked. Use Camera or Gallery.',
@@ -302,6 +363,10 @@ en:{
   e_empty:'Empty answer — try a clearer photo', e_bad:'Unexpected answer', e_generic:'Something went wrong: ',
   conf_hi:'High confidence', conf_mid:'Medium confidence', conf_lo:'Low confidence',
   r_code:'Marking on the part', r_dims:'Likely dimensions', r_use:'Where it is used', r_with:'What goes with it', r_buy:'What to ask for', r_alt:'Could it be…',
+  srch_ph:'Search the library…', lib_nores:'No results for this search.',
+  del_q:n=>`Delete "${n}" from the library?`, del_t:'Delete',
+  act_copy:'📋 Copy', act_share:'📤 Share', copied:'Copied!',
+  saved_on:(d)=>`Saved: ${d}`,
   lib_empty:'No saved parts yet.<br>Every analysis is added here automatically.', lib_title:n=>`Archive (${n})`,
   x_date:'Date', x_from:'Source', x_code:'Marking', x_dims:'Dimensions', x_with:'Goes with', x_buy:'Ask for',
   x_nothing:'Nothing to export.', wipe_q:'Delete all saved parts?',
@@ -320,13 +385,14 @@ function setLang(l){
   document.querySelectorAll('[data-ip]').forEach(e=>e.placeholder=t(e.dataset.ip));
   document.querySelectorAll('[data-it]').forEach(e=>e.title=t(e.dataset.it));
   const lb=document.getElementById('langBtn');
-  lb.textContent = l==='el'?'🇬🇧':'🇬🇷';
-  lb.title = l==='el'?'English':'Ελληνικά';
+  lb.textContent = l==='el'?'🇬🇷':'🇬🇧';
+  lb.title = l==='el'?'Ελληνικά → English':'English → Ελληνικά';
   document.getElementById('seg-el').classList.toggle('on',l==='el');
   document.getElementById('seg-en').classList.toggle('on',l==='en');
   drawChips(); envCheck(); drawGrid();
   if(lastRes) render(lastRes);
   if(view==='lib') drawLib();
+  if(typeof drawFolder==='function') drawFolder();
 }
 
 /* ═══════════ ΚΑΤΑΣΤΑΣΗ ═══════════ */
@@ -341,7 +407,7 @@ function go(v){
     document.getElementById('n-'+x).classList.toggle('on',x===v);
   });
   if(v==='lib') drawLib();
-  if(v==='set') document.getElementById('cnt').textContent=lib().length;
+  if(v==='set'){ document.getElementById('cnt').textContent=lib().length; drawFolder(); }
   scrollTo(0,0);
 }
 
@@ -597,15 +663,38 @@ async function analyze(){
     const res=JSON.parse(txt.slice(s,e+1));
     res._lang=LANG;
     lastRes=res; render(res); save(res);
+    setTimeout(()=>document.querySelector('#out .res')?.scrollIntoView({behavior:'smooth',block:'start'}),120);
   }catch(err){ showErr(t('e_generic')+err.message); return; }
   document.getElementById('goBtn').disabled=false;
 }
 
 /* ═══════════ ΕΜΦΑΝΙΣΗ ═══════════ */
-function render(r){
+function resultText(r){
+  const L=[];
+  L.push(r.onoma);
+  if(r.kodikos) L.push(`${t('r_code')}: ${r.kodikos}`);
+  if(r.perigrafi) L.push(r.perigrafi);
+  if(r.diastaseis?.length) L.push(`${t('r_dims')}: `+r.diastaseis.map(d=>`${d.onoma} ${d.timi}`).join(' | '));
+  if(r.synodeutika?.length) L.push(`${t('r_with')}: `+r.synodeutika.join(', '));
+  if(r.agora) L.push(`${t('r_buy')}: ${r.agora}`);
+  return L.join('\n');
+}
+async function copyRes(){
+  const txt=resultText(lastRes||{}); let ok=false;
+  try{ await navigator.clipboard.writeText(txt); ok=true; }
+  catch{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try{ ok=document.execCommand('copy'); }catch{} ta.remove(); }
+  if(ok){ const b=document.getElementById('copyBtn'); const o=b.textContent; b.textContent=t('copied');
+    setTimeout(()=>b.textContent=o,1600); }
+}
+async function shareRes(){
+  const txt=resultText(lastRes||{});
+  try{ await navigator.share({title:lastRes?.onoma||'Identify-AI', text:txt}); }catch{}
+}
+function render(r, savedOn){
   const cm={ypsili:['c-hi','●',t('conf_hi')],metria:['c-mid','◐',t('conf_mid')],xamili:['c-lo','○',t('conf_lo')]};
   const c=cm[r.vevaiotita]||cm.metria;
-  let h=`<div class="card res"><h3>${esc(r.onoma)}</h3><div class="conf ${c[0]}">${c[1]} ${esc(c[2])}</div><div>${esc(r.perigrafi)}</div>`;
+  let h=`<div class="card res"><h3>${esc(r.onoma)}</h3>${savedOn?`<div class="savedtag">${esc(t('saved_on',savedOn))}</div>`:''}<div class="conf ${c[0]}">${c[1]} ${esc(c[2])}</div><div>${esc(r.perigrafi)}</div>`;
   if(r.kodikos) h+=`<div class="blk"><h4>${esc(t('r_code'))}</h4><div style="font-family:ui-monospace,monospace;font-size:16px">${esc(r.kodikos)}</div></div>`;
   if(r.diastaseis?.length){
     h+=`<div class="blk"><h4>${esc(t('r_dims'))}</h4>`;
@@ -621,6 +710,9 @@ function render(r){
     r.alternatives.forEach(a=>h+=`<div class="alt"><b>${esc(a.onoma)}</b><small>${esc(a.logos)}</small></div>`);
     h+=`</div>`;
   }
+  h+=`<div class="acts"><button class="btn sec" id="copyBtn" onclick="copyRes()">${esc(t('act_copy'))}</button>`;
+  if(navigator.share) h+=`<button class="btn sec" onclick="shareRes()">${esc(t('act_share'))}</button>`;
+  h+=`</div>`;
   document.getElementById('out').innerHTML=h+`</div>`;
 }
 
@@ -635,23 +727,46 @@ function save(res){
     const l=lib();
     l.unshift({id:Date.now(),thumb:cv.toDataURL('image/jpeg',0.6),ctx,date:new Date().toISOString(),res});
     try{ localStorage.setItem(LS_LIB,JSON.stringify(l.slice(0,120))); }catch{}
+    doBackup(false);
   };
   im.src=imgs[0];
 }
-function drawLib(){
-  const l=lib(), el=document.getElementById('libList');
-  if(!l.length){ el.innerHTML=`<div class="card"><div class="empty">${t('lib_empty')}</div></div>`; return; }
-  el.innerHTML=`<div class="card"><h2>${esc(t('lib_title',l.length))}</h2>`+l.map(it=>{
+let libQ='';
+function libSearch(v){ libQ=v; drawLib(true); }
+function matches(it,q){
+  if(!q) return true;
+  const r=it.res, hay=[r.onoma,r.perigrafi,r.kodikos,r.agora,it.ctx,
+    ...(r.xrisi||[]),...(r.synodeutika||[]),...((r.diastaseis||[]).map(d=>d.onoma+' '+d.timi)),
+    ...((r.alternatives||[]).map(a=>a.onoma))].join(' ').toLowerCase();
+  return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>hay.includes(w));
+}
+function delItem(ev,id){
+  ev.stopPropagation();
+  const l=lib(), it=l.find(x=>x.id===id); if(!it) return;
+  if(!confirm(t('del_q',it.res.onoma))) return;
+  try{ localStorage.setItem(LS_LIB,JSON.stringify(l.filter(x=>x.id!==id))); }catch{}
+  doBackup(false); drawLib(true);
+}
+function drawLib(keepFocus){
+  const all=lib(), el=document.getElementById('libList');
+  if(!all.length){ el.innerHTML=`<div class="card"><div class="empty">${t('lib_empty')}</div></div>`; return; }
+  const l=all.filter(it=>matches(it,libQ));
+  const rows = l.length ? l.map(it=>{
     const d=new Date(it.date).toLocaleDateString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric'});
     return `<div class="lib" onclick="openIt(${it.id})"><img src="${it.thumb}" alt="">
       <div class="t"><b>${esc(it.res.onoma)}</b><small>${d}${it.ctx?' · '+esc(it.ctx):''}</small></div>
-      <span style="color:var(--dim)">›</span></div>`;
-  }).join('')+`</div>`;
+      <button class="del" title="${esc(t('del_t'))}" onclick="delItem(event,${it.id})">🗑</button></div>`;
+  }).join('') : `<div class="empty">${esc(t('lib_nores'))}</div>`;
+  el.innerHTML=`<div class="card"><h2>${esc(t('lib_title',all.length))}</h2>
+    <div class="srch"><span class="ic">🔍</span>
+      <input type="text" id="libQ" placeholder="${esc(t('srch_ph'))}" value="${esc(libQ)}" oninput="libSearch(this.value)"></div>
+    ${rows}</div>`;
+  if(keepFocus){ const i=document.getElementById('libQ'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } }
 }
 function openIt(id){
   const it=lib().find(x=>x.id===id); if(!it) return;
   go('scan'); imgs=[it.thumb]; drawGrid();
-  lastRes=it.res; render(it.res);
+  lastRes=it.res; render(it.res, new Date(it.date).toLocaleDateString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric'}));
   setTimeout(()=>document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'}),120);
 }
 function exportLib(){
@@ -671,6 +786,170 @@ function exportLib(){
 }
 function wipe(){
   if(confirm(t('wipe_q'))){ try{ localStorage.removeItem(LS_LIB); }catch{} drawLib(); document.getElementById('cnt').textContent=0; }
+}
+
+/* ═══════════ ΚΟΙΝΟΣ ΦΑΚΕΛΟΣ ΑΝΤΙΓΡΑΦΩΝ ═══════════ */
+const BK_SUB = 'Identify-AI';
+const BK_SUPPORTED = typeof window.showDirectoryPicker === 'function';
+
+function bkDB(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open('shared-backups', 1);
+    r.onupgradeneeded = () => { if(!r.result.objectStoreNames.contains('handles')) r.result.createObjectStore('handles'); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function bkTx(mode, fn){
+  const db = await bkDB();
+  return new Promise((res,rej)=>{
+    const tx = db.transaction('handles', mode), st = tx.objectStore('handles');
+    const rq = fn(st);
+    tx.oncomplete = () => { db.close(); res(rq ? rq.result : undefined); };
+    tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); };
+  });
+}
+const getRoot = () => bkTx('readonly', st => st.get('root')).catch(()=>null);
+const setRoot = h => bkTx('readwrite', st => st.put(h, 'root'));
+const delRoot = () => bkTx('readwrite', st => st.delete('root'));
+
+async function ensurePerm(h, interactive){
+  if(typeof h.queryPermission !== 'function') return true;
+  if(await h.queryPermission({mode:'readwrite'}) === 'granted') return true;
+  if(!interactive) return false;
+  return (await h.requestPermission({mode:'readwrite'})) === 'granted';
+}
+async function pickFolder(){
+  const h = await window.showDirectoryPicker({id:'backups', mode:'readwrite', startIn:'downloads'});
+  await setRoot(h);
+  return h;
+}
+
+function localDate(){
+  const d=new Date(), z=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+}
+function backupPayload(){
+  return JSON.stringify({app:'Identify-AI', format:1, created:new Date().toISOString(), lib:lib()});
+}
+function downloadBackup(name, json){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* interactive=true: μέσα σε πάτημα κουμπιού (επιτρέπονται ερωτήσεις και λήψη)
+   interactive=false: αυτόματο, αθόρυβο — γράφει μόνο αν υπάρχει ήδη άδεια */
+async function doBackup(interactive){
+  const name=`identify-ai-antigrafo-${localDate()}.json`, json=backupPayload();
+  if(BK_SUPPORTED){
+    try{
+      let root = await getRoot();
+      if(!root && interactive) root = await pickFolder();
+      if(root && await ensurePerm(root, interactive)){
+        const sub = await root.getDirectoryHandle(BK_SUB, {create:true});
+        const fh = await sub.getFileHandle(name, {create:true});
+        const w = await fh.createWritable(); await w.write(json); await w.close();
+        return {ok:'dir', where:`${root.name} / ${BK_SUB}`};
+      }
+    }catch(e){ console.warn('backup folder', e); }
+  }
+  if(interactive){ downloadBackup(name, json); return {ok:'dl'}; }
+  return {ok:false};
+}
+
+function bkMsg(html, cls){ document.getElementById('bkMsg').innerHTML = html ? `<div class="${cls}">${html}</div>` : ''; }
+
+async function backupBtn(){
+  document.getElementById('bkList').innerHTML='';
+  const r = await doBackup(true);
+  if(r.ok==='dir') bkMsg(esc(t('bk_ok_dir', r.where)),'okmsg');
+  else if(r.ok==='dl') bkMsg(esc(t('bk_ok_dl')),'okmsg');
+  drawFolder();
+}
+
+async function pickFolderBtn(){
+  if(!BK_SUPPORTED) return;
+  try{ await pickFolder(); }catch(e){ /* ακύρωση */ }
+  drawFolder();
+}
+async function clearFolder(){
+  if(!confirm(t('bk_clear_q'))) return;
+  try{ await delRoot(); }catch{}
+  document.getElementById('bkList').innerHTML=''; bkMsg('');
+  drawFolder();
+}
+
+async function drawFolder(){
+  const nameEl=document.getElementById('bkFolder'), pick=document.getElementById('bkPick'),
+        clr=document.getElementById('bkClear'), hint=document.getElementById('bkHint');
+  if(!BK_SUPPORTED){
+    nameEl.textContent=t('bk_none'); nameEl.className='fn none';
+    pick.classList.add('hidden'); clr.classList.add('hidden');
+    hint.textContent=t('bk_unsup'); return;
+  }
+  const root = await getRoot();
+  nameEl.textContent = root ? `${root.name} / ${BK_SUB}` : t('bk_none');
+  nameEl.className = root ? 'fn' : 'fn none';
+  pick.textContent = root ? t('bk_change') : t('bk_pick');
+  clr.classList.toggle('hidden', !root);
+  hint.textContent = t('bk_hint');
+}
+
+/* ── επαναφορά ── */
+function parseBackup(txt){
+  const d = JSON.parse(txt);
+  if(!d || d.app!=='Identify-AI' || !Array.isArray(d.lib)) throw new Error('bad');
+  return d.lib;
+}
+function applyRestore(items, label){
+  if(!confirm(t('bk_restore_q', items.length, label))) return;
+  try{ localStorage.setItem(LS_LIB, JSON.stringify(items.slice(0,120))); }catch{}
+  document.getElementById('cnt').textContent = lib().length;
+  document.getElementById('bkList').innerHTML='';
+  bkMsg(esc(t('bk_restored', items.length)),'okmsg');
+}
+
+let bkFiles = [];
+async function restoreList(){
+  const list=document.getElementById('bkList'); list.innerHTML=''; bkMsg('');
+  if(!BK_SUPPORTED){ restoreIn.click(); return; }
+  const root = await getRoot();
+  if(!root){ bkMsg(esc(t('bk_nodir')),'err'); return; }
+  try{
+    if(!await ensurePerm(root, true)){ bkMsg(esc(t('bk_noperm')),'err'); return; }
+    let sub;
+    try{ sub = await root.getDirectoryHandle(BK_SUB); }catch{ bkMsg(esc(t('bk_empty')),'err'); return; }
+    const files=[];
+    for await (const [name, h] of sub.entries()){
+      if(h.kind==='file' && name.toLowerCase().endsWith('.json')){
+        const f = await h.getFile();
+        files.push({name, h, mod:f.lastModified});
+      }
+    }
+    if(!files.length){ bkMsg(esc(t('bk_empty')),'err'); return; }
+    files.sort((a,b)=> b.name.localeCompare(a.name) || b.mod-a.mod);
+    bkFiles = files.slice(0,10);
+    list.innerHTML = bkFiles.map((f,i)=>{
+      const d=new Date(f.mod).toLocaleString(t('locale'),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<button class="bkitem" onclick="restoreFromDir(${i})">
+        <span class="nm">${esc(f.name)}<small>${esc(d)}</small></span>
+        ${i===0?`<span class="badge">${esc(t('bk_newest'))}</span>`:''}</button>`;
+    }).join('');
+  }catch(e){ bkMsg(esc(t('e_generic')+e.message),'err'); }
+}
+async function restoreFromDir(i){
+  const f=bkFiles[i]; if(!f) return;
+  try{ applyRestore(parseBackup(await (await f.h.getFile()).text()), f.name); }
+  catch{ bkMsg(esc(t('bk_bad')),'err'); }
+}
+function restoreFromFile(e){
+  const file=e.target.files[0]; e.target.value=''; if(!file) return;
+  document.getElementById('bkList').innerHTML=''; bkMsg('');
+  const fr=new FileReader();
+  fr.onload=()=>{ try{ applyRestore(parseBackup(fr.result), file.name); }catch{ bkMsg(esc(t('bk_bad')),'err'); } };
+  fr.readAsText(file);
 }
 
 setLang(LANG);
